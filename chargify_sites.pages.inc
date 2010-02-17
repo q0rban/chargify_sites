@@ -113,7 +113,7 @@ function chargify_sites_payment_form(&$form_state, $node) {
     '#title' => t('Credit Card Number'),
     '#required' => TRUE,
   );
-  $form['cc']['cvv'] = array(
+/*  $form['cc']['cvv'] = array(
     '#type' => 'textfield',
     '#title' => t('CVV'),
     '#length' => 4,
@@ -125,7 +125,7 @@ function chargify_sites_payment_form(&$form_state, $node) {
     '#title' => t('Billing Zip Code'),
     '#maxlength' => 10,
     '#required' => TRUE,
-  );
+  );*/
   $form['cc']['expiration_month'] = array(
     '#type' => 'select',
     '#title' => t('Expiration Date'),
@@ -155,7 +155,7 @@ function chargify_sites_payment_form_validate($form, &$form_state) {
   }
 
   // Verify numeric on certain fields.
-  $fields = array('card_number' => t('credit card number'), 'cvv' => t('CVV'), 'billing_zip' => t('billing zip code'));
+  $fields = array('card_number' => t('credit card number')); //, 'cvv' => t('CVV'), 'billing_zip' => t('billing zip code'));
   foreach ($fields as $field => $label) {
     $value = $values[$field];
 
@@ -189,9 +189,22 @@ function chargify_sites_payment_form_validate($form, &$form_state) {
 /**
  * Submit handler.
  */
-function chargify_sites_payment_submit($form, &$form_state) {
+function chargify_sites_payment_form_submit($form, &$form_state) {
   $values = $form_state['values'];
 
+  if ($values['reference']) {
+    
+  }
+  else if ($account = _chargify_sites_create_user($values['email'])) {
+    $json = _chargify_sites_create_subscription($values, $account);
+    $subscription = chargify_api_subscription_create($json, 'json');
+    if ($subscription->getState() == CHARGIFY_ACTIVE) {
+      $form_state['redirect'] = 'new-site/paid';
+    }
+  }
+  else {
+    drupal_set_message(t('Hmm. Something didn\'t work right. You might want to contact the administrator.'));
+  }
 }
 
 /**
@@ -241,4 +254,39 @@ function _chargify_sites_years() {
   }
 
   return $years;
+}
+
+/**
+ * Helper function to create a user.
+ */
+function _chargify_sites_create_user($mail) {
+  $array = array();
+  $array['name'] = $array['mail'] = $mail;
+  $array['status'] = 1;
+  $array['pass'] = user_password(8);
+
+  if ($account = user_save('', $array)) {
+    // Now log in the user.
+    user_authenticate($array);
+    return $account;
+  }
+
+  return FALSE;
+}
+
+function _chargify_sites_create_subscription($values, $account) {
+  $object = new stdClass();
+
+  $object->subscription->product_handle = 'basic';
+
+  $object->subscription->customer_attributes->first_name = $values['first_name'];
+  $object->subscription->customer_attributes->last_name = $values['last_name'];
+  $object->subscription->customer_attributes->email = $values['email'];
+  $object->subscription->customer_attributes->reference = $account->uid;
+
+  $object->subscription->credit_card_attributes->full_number = $values['card_number'];
+  $object->subscription->credit_card_attributes->expiration_month = $values['expiration_month'];
+  $object->subscription->credit_card_attributes->expiration_year = $values['expiration_year'];
+
+  return json_encode($object);
 }
