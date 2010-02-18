@@ -139,5 +139,39 @@ function _chargify_sites_user_default_permissions() {
     'roles' => array(),
   );
 
+  // Exported permission: view any page content
+  $permissions[] = array(
+    'name' => 'view any page content',
+    'roles' => array(
+      '0' => 'anonymous user',
+      '1' => 'authenticated user',
+    ),
+  );
+
+  // Exported permission: view any site content
+  $permissions[] = array(
+    'name' => 'view any site content',
+    'roles' => array(
+      '0' => 'Admin',
+    ),
+  );
+
+  // Exported permission: view own page content
+  $permissions[] = array(
+    'name' => 'view own page content',
+    'roles' => array(
+      '0' => 'anonymous user',
+      '1' => 'authenticated user',
+    ),
+  );
+
+  // Exported permission: view own site content
+  $permissions[] = array(
+    'name' => 'view own site content',
+    'roles' => array(
+      '0' => 'authenticated user',
+    ),
+  );
+
   return $permissions;
 }

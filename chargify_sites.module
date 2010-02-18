@@ -37,10 +37,11 @@ function chargify_sites_menu() {
     'file' => 'chargify_sites.pages.inc',
   );
 
-  $items['new-site/paid'] = array(
+  $items['new-site/paid/%node'] = array(
     'title' => 'Thanks!',
     'description' => 'Configure settings',
     'page callback' => 'chargify_sites_paid_page',
+    'page arguments' => array(2),
     'access arguments' => array('create site content'),
     'file' => 'chargify_sites.pages.inc',
   );
@@ -78,4 +79,3 @@ function chargify_sites_strongarm() {
     'ant_pattern_site' => '[field_domain-url]',
   );
 }
-

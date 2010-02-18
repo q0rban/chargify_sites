@@ -61,27 +61,30 @@ function chargify_sites_payment_page($node) {
 function chargify_sites_payment_form(&$form_state, $node) {
   $form = array();
 
+  $form['#node'] = $node;
+
+  $form['account'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Contact info'),
+    '#attributes' => array('class' => 'contact-info'),
+  );
+
+  $form['account']['first_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('First Name'),
+    '#default_value' => '',
+    '#required' => TRUE,
+  );
+
+  $form['account']['last_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Last Name'),
+    '#default_value' => '',
+    '#required' => TRUE,
+  );
+
   // @todo: check to make sure user registration is turned on.
   if (user_is_anonymous()) {
-    $form['account'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Contact info'),
-    );
-
-    $form['account']['first_name'] = array(
-      '#type' => 'textfield',
-      '#title' => t('First Name'),
-      '#default_value' => '',
-      '#required' => TRUE,
-    );
-
-    $form['account']['last_name'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Last Name'),
-      '#default_value' => '',
-      '#required' => TRUE,
-    );
-
     $form['account']['email'] = array(
       '#type' => 'textfield',
       '#title' => t('E-mail address'),
@@ -107,6 +110,7 @@ function chargify_sites_payment_form(&$form_state, $node) {
   $form['cc'] = array(
     '#type' => 'fieldset',
     '#title' => t('Credit Card info'),
+    '#attributes' => array('class' => 'cc-info'),
   );
   $form['cc']['card_number'] = array(
     '#type' => 'textfield',
@@ -128,7 +132,7 @@ function chargify_sites_payment_form(&$form_state, $node) {
   );*/
   $form['cc']['expiration_month'] = array(
     '#type' => 'select',
-    '#title' => t('Expiration Date'),
+    '#title' => t('Expiration'),
     '#options' => _chargify_sites_months(),
   );
   $form['cc']['expiration_year'] = array(
@@ -152,6 +156,13 @@ function chargify_sites_payment_form_validate($form, &$form_state) {
   // Validate the e-mail address:
   if ($error = user_validate_mail($values['email'])) {
     form_set_error('email', $error);
+  }
+  else if (db_result(db_query("SELECT COUNT(*) FROM {users} WHERE LOWER(mail) = LOWER('%s')", $edit['email'])) > 0) {
+    $options = array('query' => drupal_get_destination());
+    form_set_error('email', t('The e-mail address %email is already registered. <a href="@login">Why not log in?</a>', array('%email' => $edit['email'], '@login' => url('user/login', $options))));
+  }
+  else if (drupal_is_denied('mail', $edit['email'])) {
+    form_set_error('email', t('The e-mail address %email has been denied access.', array('%email' => $edit['email'])));
   }
 
   // Verify numeric on certain fields.
@@ -191,27 +202,42 @@ function chargify_sites_payment_form_validate($form, &$form_state) {
  */
 function chargify_sites_payment_form_submit($form, &$form_state) {
   $values = $form_state['values'];
+  $node = $form['#node'];
+  $link = l($node->title, "node/{$node->nid}");
+  global $user;
 
-  if ($values['reference']) {
-    
+  // We have an existing drupal user and chargify customer.
+  // @TODO: don't ping chargify to find out if we have an existing customer.
+  if ($values['reference'] && $customer = chargify_api_customer_get($values['reference'], 'reference')) {
+    $account = $user;
   }
-  else if ($account = _chargify_sites_create_user($values['email'])) {
-    $json = _chargify_sites_create_subscription($values, $account);
-    $subscription = chargify_api_subscription_create($json, 'json');
-    if ($subscription->getState() == CHARGIFY_ACTIVE) {
-      $form_state['redirect'] = 'new-site/paid';
-    }
+  // We have an existing drupal user but not a customer, so we need to unset the 
+  // reference field to create a new chargify customer.
+  else if ($values['reference']) {
+    unset($values['reference']);
+    $account = $user;
+  }
+  // User is anonymous and not a chargify customer: create a new user.
+  else {
+    $account = _chargify_sites_create_user($values['email']);
+  }
+
+  if ($account && chargify_sites_create_subscription($values, $account, $node)) {
+    // Update the node to 
+    $node->uid = $account->uid;
+    node_save($node);
+    $form_state['redirect'] = "node/{$node->nid}";
   }
   else {
-    drupal_set_message(t('Hmm. Something didn\'t work right. You might want to contact the administrator.'));
+    drupal_set_message(t("Hmm. Something didn't work right. You might want to contact an administrator."), 'error');
   }
 }
 
 /**
  * Page callback for Thank you page.
  */
-function chargify_sites_paid_page() {
-  return(t('Thanks for your payment! :)'));
+function chargify_sites_paid_page($node) {
+  return t('Yay, @title is all paid up!', array('@title' => $node->title));
 }
 
 /**
@@ -274,15 +300,48 @@ function _chargify_sites_create_user($mail) {
   return FALSE;
 }
 
+function chargify_sites_create_subscription($values, $account, $node) {
+  $success = TRUE;
+  $json = _chargify_sites_create_subscription($values, $account);
+  $subscription = chargify_api_subscription_create($json, 'json');
+
+  if (isset($subscription->error)) {
+    $message = "An error was detected during subscription:\n !error";
+    watchdog('chargify subscription', $message, array('!error' => $subscription->error), WATCHDOG_ERROR, $link);
+    $success = FALSE;
+  }
+  else if ($subscription->getState() == CHARGIFY_ACTIVE) {
+    $message = "Successful subscription for !node by <a href='!user_url'>%customer</a>";
+    $vars = array(
+      '!node' => $link,
+      '!user_url' => url("user/{$account->uid}"),
+    );
+
+    watchdog('chargify subscription', $message, $vars, WATCHDOG_INFO, $link);
+  }
+  else {
+    $message = "An error was detected during subscription for !node.";
+    watchdog('chargify subscription', $message, array('!node' => $link), WATCHDOG_ERROR, $link);
+    $success = FALSE;
+  }
+
+  return $success;
+}
+
 function _chargify_sites_create_subscription($values, $account) {
   $object = new stdClass();
 
   $object->subscription->product_handle = 'basic';
 
-  $object->subscription->customer_attributes->first_name = $values['first_name'];
-  $object->subscription->customer_attributes->last_name = $values['last_name'];
-  $object->subscription->customer_attributes->email = $values['email'];
-  $object->subscription->customer_attributes->reference = $account->uid;
+  if (isset($values['reference'])) {
+    $object->subscription->customer_reference = $values['reference'];
+  }
+  else {
+    $object->subscription->customer_attributes->first_name = $values['first_name'];
+    $object->subscription->customer_attributes->last_name = $values['last_name'];
+    $object->subscription->customer_attributes->email = $values['email'];
+    $object->subscription->customer_attributes->reference = $account->uid;
+  }
 
   $object->subscription->credit_card_attributes->full_number = $values['card_number'];
   $object->subscription->credit_card_attributes->expiration_month = $values['expiration_month'];
