@@ -157,12 +157,12 @@ function chargify_sites_payment_form_validate($form, &$form_state) {
   if ($error = user_validate_mail($values['email'])) {
     form_set_error('email', $error);
   }
-  else if (db_result(db_query("SELECT COUNT(*) FROM {users} WHERE LOWER(mail) = LOWER('%s')", $edit['email'])) > 0) {
+  else if (db_result(db_query("SELECT COUNT(*) FROM {users} WHERE LOWER(mail) = LOWER('%s')", $values['email'])) > 0) {
     $options = array('query' => drupal_get_destination());
-    form_set_error('email', t('The e-mail address %email is already registered. <a href="@login">Why not log in?</a>', array('%email' => $edit['email'], '@login' => url('user/login', $options))));
+    form_set_error('email', t('The e-mail address %email is already registered. <a href="@login">Why not log in?</a>', array('%email' => $values['email'], '@login' => url('user/login', $options))));
   }
-  else if (drupal_is_denied('mail', $edit['email'])) {
-    form_set_error('email', t('The e-mail address %email has been denied access.', array('%email' => $edit['email'])));
+  else if (drupal_is_denied('mail', $values['email'])) {
+    form_set_error('email', t('The e-mail address %email has been denied access.', array('%email' => $values['email'])));
   }
 
   // Verify numeric on certain fields.
@@ -222,8 +222,8 @@ function chargify_sites_payment_form_submit($form, &$form_state) {
     $account = _chargify_sites_create_user($values['email']);
   }
 
-  if ($account && chargify_sites_create_subscription($values, $account, $node)) {
-    // Update the node to 
+  if ($account && $subscription = chargify_sites_create_subscription($values, $account, $node)) {
+    // Update the node creator
     $node->uid = $account->uid;
     node_save($node);
     $form_state['redirect'] = "node/{$node->nid}";
@@ -325,7 +325,7 @@ function chargify_sites_create_subscription($values, $account, $node) {
     $success = FALSE;
   }
 
-  return $success;
+  return $success ? $subscription : FALSE;
 }
 
 function _chargify_sites_create_subscription($values, $account) {
