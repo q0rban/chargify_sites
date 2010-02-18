@@ -96,11 +96,6 @@ function chargify_sites_payment_form(&$form_state, $node) {
   else {
     global $user;
 
-    $form['reference'] = array(
-      '#type' => 'hidden',
-      '#value' => $user->uid,
-    );
-
     $form['email'] = array(
       '#type' => 'hidden',
       '#value' => $user->mail,
@@ -157,12 +152,14 @@ function chargify_sites_payment_form_validate($form, &$form_state) {
   if ($error = user_validate_mail($values['email'])) {
     form_set_error('email', $error);
   }
-  else if (db_result(db_query("SELECT COUNT(*) FROM {users} WHERE LOWER(mail) = LOWER('%s')", $values['email'])) > 0) {
-    $options = array('query' => drupal_get_destination());
-    form_set_error('email', t('The e-mail address %email is already registered. <a href="@login">Why not log in?</a>', array('%email' => $values['email'], '@login' => url('user/login', $options))));
-  }
-  else if (drupal_is_denied('mail', $values['email'])) {
-    form_set_error('email', t('The e-mail address %email has been denied access.', array('%email' => $values['email'])));
+  else if (user_is_anonymous()) {
+    if (db_result(db_query("SELECT COUNT(*) FROM {users} WHERE LOWER(mail) = LOWER('%s')", $values['email'])) > 0) {
+      $options = array('query' => drupal_get_destination());
+      form_set_error('email', t('The e-mail address %email is already registered. <a href="@login">Why not log in?</a>', array('%email' => $values['email'], '@login' => url('user/login', $options))));
+    }
+    else if (drupal_is_denied('mail', $values['email'])) {
+      form_set_error('email', t('The e-mail address %email has been denied access.', array('%email' => $values['email'])));
+    }
   }
 
   // Verify numeric on certain fields.
@@ -206,18 +203,11 @@ function chargify_sites_payment_form_submit($form, &$form_state) {
   $link = l($node->title, "node/{$node->nid}");
   global $user;
 
-  // We have an existing drupal user and chargify customer.
-  // @TODO: don't ping chargify to find out if we have an existing customer.
-  if ($values['reference'] && $customer = chargify_api_customer_get($values['reference'], 'reference')) {
+  // We have an existing drupal user.
+  if (!user_is_anonymous()) {
     $account = $user;
   }
-  // We have an existing drupal user but not a customer, so we need to unset the 
-  // reference field to create a new chargify customer.
-  else if ($values['reference']) {
-    unset($values['reference']);
-    $account = $user;
-  }
-  // User is anonymous and not a chargify customer: create a new user.
+  // User is anonymous: create a new user.
   else {
     $account = _chargify_sites_create_user($values['email']);
   }
@@ -300,6 +290,22 @@ function _chargify_sites_create_user($mail) {
   return FALSE;
 }
 
+function _chargify_sites_user_update(&$account, $subscription) {
+  // Update the user if necessary
+  if (!isset($account->customer_id)) {
+    $customer = $subscription->getCustomer();
+    $array = array(
+      'customer_id' => $customer->getID(),
+      'subscriptions' => array($subscription),
+    );
+    user_save($account, $array);
+  }
+  else if (isset($account->subscriptions)) {
+    $record = chargify_subscription_save_record($subscription, $account->uid);
+    $account->subscriptions[$record->subscription_id] = $record;
+  }
+}
+
 function chargify_sites_create_subscription($values, $account, $node) {
   $success = TRUE;
   $json = _chargify_sites_create_subscription($values, $account);
@@ -316,8 +322,9 @@ function chargify_sites_create_subscription($values, $account, $node) {
       '!node' => $link,
       '!user_url' => url("user/{$account->uid}"),
     );
-
     watchdog('chargify subscription', $message, $vars, WATCHDOG_INFO, $link);
+
+    _chargify_sites_user_update($account, $subscription);
   }
   else {
     $message = "An error was detected during subscription for !node.";
@@ -333,8 +340,8 @@ function _chargify_sites_create_subscription($values, $account) {
 
   $object->subscription->product_handle = 'basic';
 
-  if (isset($values['reference'])) {
-    $object->subscription->customer_reference = $values['reference'];
+  if (isset($account->customer_id)) {
+    $object->subscription->customer_id = $account->customer_id;
   }
   else {
     $object->subscription->customer_attributes->first_name = $values['first_name'];
