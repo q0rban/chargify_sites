@@ -69,6 +69,58 @@ function chargify_sites_payment_form(&$form_state, $node) {
 
   $form['#node'] = $node;
 
+  // @todo: check to make sure user registration is turned on.
+  if (user_is_anonymous()) {
+    $form['register'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Create an account'),
+      '#attributes' => array('class' => 'register'),
+      '#tree' => TRUE,
+    );
+    $form['register']['mail'] = array(
+      '#type' => 'textfield',
+      '#title' => t('E-mail address'),
+      '#default_value' => '',
+      '#maxlength' => EMAIL_MAX_LENGTH,
+    );
+    $form['register']['pass'] = array(
+      '#type' => 'password_confirm',
+    );
+
+    $form['login'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Login to an existing account'),
+      '#attributes' => array('class' => 'login'),
+      '#tree' => TRUE,
+    );
+    $form['login']['mail'] = array(
+      '#type' => 'textfield',
+      '#title' => t('E-mail address'),
+      '#default_value' => '',
+      '#maxlength' => EMAIL_MAX_LENGTH,
+    );
+    $form['login']['pass'] = array(
+      '#type' => 'password',
+      '#title' => t('Password'),
+    );
+  }
+  else {
+    global $user;
+
+    $form['mail'] = array(
+      '#type' => 'hidden',
+      '#value' => $user->mail,
+    );
+
+    // The user object doesn't have the customer ID yet, so we need to load it.
+    if ($customer_id = chargify_uid_to_customer_id($user->uid)) {
+      $form['customer_id'] = array(
+        '#type' => 'hidden',
+        '#value' => $customer_id,
+      );
+    }
+  }
+
   $form['account'] = array(
     '#type' => 'fieldset',
     '#title' => t('Contact info'),
@@ -88,33 +140,6 @@ function chargify_sites_payment_form(&$form_state, $node) {
     '#default_value' => '',
     '#required' => TRUE,
   );
-
-  // @todo: check to make sure user registration is turned on.
-  if (user_is_anonymous()) {
-    $form['account']['email'] = array(
-      '#type' => 'textfield',
-      '#title' => t('E-mail address'),
-      '#default_value' => '',
-      '#maxlength' => EMAIL_MAX_LENGTH,
-      '#required' => TRUE,
-    );
-  }
-  else {
-    global $user;
-
-    $form['email'] = array(
-      '#type' => 'hidden',
-      '#value' => $user->mail,
-    );
-
-    // The user object doesn't have the customer ID yet, so we need to load it.
-    if ($customer_id = chargify_uid_to_customer_id($user->uid)) {
-      $form['customer_id'] = array(
-        '#type' => 'hidden',
-        '#value' => $customer_id,
-      );
-    }
-  }
 
   $form['cc'] = array(
     '#type' => 'fieldset',
@@ -162,17 +187,21 @@ function chargify_sites_payment_form(&$form_state, $node) {
 function chargify_sites_payment_form_validate($form, &$form_state) {
   $values = $form_state['values'];
 
-  // Validate the e-mail address:
-  if ($error = user_validate_mail($values['email'])) {
-    form_set_error('email', $error);
-  }
-  else if (user_is_anonymous()) {
-    if (db_result(db_query("SELECT COUNT(*) FROM {users} WHERE LOWER(mail) = LOWER('%s')", $values['email'])) > 0) {
-      $options = array('query' => drupal_get_destination());
-      form_set_error('email', t('The e-mail address %email is already registered. <a href="@login">Why not log in?</a>', array('%email' => $values['email'], '@login' => url('user/login', $options))));
+  if (isset($values['login']) || isset($values['register'])) {
+    if ($values['login']['mail']) {
+      $values['login']['name'] = $values['login']['mail'];
+      $dummy_form_state = array('values' => &$values['login']);
+      foreach (user_login_default_validators() as $fnc) {
+        $fnc($form, $dummy_form_state);
+      }
     }
-    else if (drupal_is_denied('mail', $values['email'])) {
-      form_set_error('email', t('The e-mail address %email has been denied access.', array('%email' => $values['email'])));
+    else if ($values['register']['mail']) {
+      $values['register']['name'] = $values['register']['mail'];
+      $dummy_form_state = array('values' => &$values['register']);
+      user_register_validate($form, $dummy_form_state);
+    }
+    else {
+      form_set_error('register', t('Whoops, you need to log in or register in order to pay!'));
     }
   }
 
@@ -216,18 +245,18 @@ function chargify_sites_payment_form_submit($form, &$form_state) {
   $node = $form['#node'];
   global $user;
 
-  // User is anonymous: create a new user.
-  if (user_is_anonymous()) {
-    $account = _chargify_sites_create_user($values['email']);
+  if (isset($values['register']) && $values['register']['mail']) {
+    $values['register']['name'] = $values['register']['mail'];
+    $dummy_form_state = array('values' => &$values['register']);
+    user_register_submit($form, $dummy_form_state);
   }
-  // We have an existing drupal user.
-  else {
-    $account = $user;
-    if (isset($values['customer_id'])) {
-      $account->customer_id = $values['customer_id'];
-      // Unset the customer ID so chargify.module doesn't try to add it again.
-      unset($values['customer_id']);
-    }
+
+  $account = $user;
+
+  if (isset($values['customer_id'])) {
+    $account->customer_id = $values['customer_id'];
+    // Unset the customer ID so chargify.module doesn't try to add it again.
+    unset($values['customer_id']);
   }
 
   if ($account && $subscription = chargify_sites_create_subscription($values, $account, $node)) {
@@ -292,23 +321,8 @@ function _chargify_sites_years() {
 }
 
 /**
- * Helper function to create a user.
+ * Update a user with subscription data.
  */
-function _chargify_sites_create_user($mail) {
-  $array = array();
-  $array['name'] = $array['mail'] = $mail;
-  $array['status'] = 1;
-  $array['pass'] = user_password(8);
-
-  if ($account = user_save('', $array)) {
-    // Now log in the user.
-    user_authenticate($array);
-    return $account;
-  }
-
-  return FALSE;
-}
-
 function _chargify_sites_user_update(&$account, $subscription) {
   // Update the user if necessary
   $array = array('subscriptions' => array($subscription));
@@ -321,6 +335,9 @@ function _chargify_sites_user_update(&$account, $subscription) {
   user_save($account, $array);
 }
 
+/**
+ * Creates a subscription for a node and user.
+ */
 function chargify_sites_create_subscription($values, $account, $node) {
   $success = TRUE;
   $link = l($node->title, "node/{$node->nid}");
@@ -339,6 +356,7 @@ function chargify_sites_create_subscription($values, $account, $node) {
       '!user_url' => url("user/{$account->uid}"),
     );
     watchdog('subscription', $message, $vars, WATCHDOG_INFO, $link);
+    drupal_set_message(t('Yay, it worked!  You are now all paid up on !title', array('!title' => $node->title)));
 
     _chargify_sites_user_update($account, $subscription);
   }
@@ -351,6 +369,16 @@ function chargify_sites_create_subscription($values, $account, $node) {
   return $success ? $subscription : FALSE;
 }
 
+/**
+ * Creates the subscription post data to send to chargify
+ *
+ * @param $values
+ *   The submitted data.
+ * @param $account
+ *   The user account that this subscription will be associated with.
+ * @return
+ *   json data to post to chargify.
+ */
 function _chargify_sites_create_subscription($values, $account) {
   $object = new stdClass();
 
@@ -362,7 +390,7 @@ function _chargify_sites_create_subscription($values, $account) {
   else {
     $object->subscription->customer_attributes->first_name = $values['first_name'];
     $object->subscription->customer_attributes->last_name = $values['last_name'];
-    $object->subscription->customer_attributes->email = $values['email'];
+    $object->subscription->customer_attributes->email = $account->mail;
     $object->subscription->customer_attributes->reference = $account->uid;
   }
 

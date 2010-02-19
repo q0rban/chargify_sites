@@ -12,6 +12,13 @@ function chargify_sites_enable() {
 }
 
 /**
+ * Implementation of hook_init().
+ */
+function chargify_sites_init() {
+  drupal_add_css(drupal_get_path('module', 'chargify_sites') .'/chargify_sites.css');
+}
+
+/**
  * Implementation of hook_menu().
  */
 function chargify_sites_menu() {
@@ -50,10 +57,16 @@ function chargify_sites_menu() {
   return $items;
 }
 
+/**
+ * Alter the payment page title.
+ */
 function chargify_sites_payment_page_title($node) {
   return t('Time to pay for !title', array('!title' => $node->title));
 }
 
+/**
+ * Provide access for the payment page.
+ */
 function chargify_sites_payment_page_access($node, $account = NULL) {
   global $user;
   $account = is_null($account) ? $user : $account;
@@ -103,6 +116,7 @@ function chargify_sites_strongarm() {
   return array(
     'ant_site' => 1,
     'ant_pattern_site' => '[field_domain-url]',
+    'user_email_verification' => FALSE,
   );
 }
 
@@ -117,6 +131,15 @@ function chargify_sites_content_extra_fields() {
   );
 
   return $extras;
+}
+
+/**
+ * Set some theme settings. Called by _webgear_feature_enable().
+ */
+function chargify_sites_theme_settings() {
+  return array(
+    'toggle_node_info_site' => 0,
+  );
 }
 
 /**
