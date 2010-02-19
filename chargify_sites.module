@@ -117,6 +117,12 @@ function chargify_sites_strongarm() {
     'ant_site' => 1,
     'ant_pattern_site' => '[field_domain-url]',
     'user_email_verification' => FALSE,
+    'nodeformsettings_submit_site' => 'Buy it!',
+    'nodeformsettings_cancel_site' => 0,
+    'nodeformsettings_inputformat_site' => 1,
+    'nodeformsettings_preview_site' => 1,
+    'nodeformsettings_revisionlog_site' => 0,
+    'nodeformsettings_splitsummary_site' => 1,
   );
 }
 
