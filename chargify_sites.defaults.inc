@@ -11,17 +11,18 @@ function _chargify_sites_content_default_fields() {
     'field_name' => 'field_domain',
     'type_name' => 'site',
     'display_settings' => array(
+      'weight' => '31',
+      'parent' => '',
       'label' => array(
-        'format' => 'above',
-        'exclude' => 0,
+        'format' => 'hidden',
       ),
       'teaser' => array(
         'format' => 'default',
-        'exclude' => 0,
+        'exclude' => 1,
       ),
       'full' => array(
         'format' => 'default',
-        'exclude' => 0,
+        'exclude' => 1,
       ),
       '4' => array(
         'format' => 'default',
