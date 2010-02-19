@@ -33,7 +33,8 @@ function chargify_sites_menu() {
     'description' => 'Configure settings',
     'page callback' => 'chargify_sites_payment_page',
     'page arguments' => array(2),
-    'access arguments' => array('create site content'),
+    'access callback' => 'chargify_sites_payment_page_access',
+    'access arguments' => array(2),
     'file' => 'chargify_sites.pages.inc',
   );
 
@@ -53,6 +54,12 @@ function chargify_sites_payment_page_title($node) {
   return t('Time to pay for !title', array('!title' => $node->title));
 }
 
+function chargify_sites_payment_page_access($node, $account = NULL) {
+  global $user;
+  $account = is_null($account) ? $user : $account;
+  return ($node->uid == $account->uid);
+}
+
 /**
  * Implementation of hook_perm().
  */
@@ -68,14 +75,76 @@ function chargify_sites_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
     switch ($op) {
       case 'insert':
         $_REQUEST['destination'] = 'new-site/time-to-pay/'. $node->nid;
+      case 'update':
+        if (isset($node->subscription->subscription_id)) {
+          chargify_sites_node_save($node);
+        }
+        break;
+      case 'load':
+        return chargify_sites_node_load($node);
+      case 'view':
+        if (isset($node->subscription) && $output = theme('chargify_subscription_state', $node->subscription->state)) {
+          $weight = content_extra_field_weight($node->type, 'chargify_sites');
+
+          $node->content['chargify_sites'] = array(
+            '#weight' => !empty($weight) ? $weight : -10,
+            '#value' => $output,
+          );
+        }
         break;
     }
   }
 }
 
+/**
+ * Implementation of hook_strongarm().
+ */
 function chargify_sites_strongarm() {
   return array(
     'ant_site' => 1,
     'ant_pattern_site' => '[field_domain-url]',
   );
+}
+
+/**
+ * Implementation of hook_content_extra_fields().
+ */
+function chargify_sites_content_extra_fields() {
+  $extras['chargify_sites'] = array(
+    'label' => t('Subscription Status'),
+    'description' => t('Chargify subscription status fieldset.'),
+    'weight' => -10,
+  );
+
+  return $extras;
+}
+
+/**
+ * Helper function to save a node.
+ */
+function chargify_sites_node_save(&$node) {
+  $record = array('nid' => $node->nid, 'subscription_id' => $node->subscription->subscription_id);
+
+  // Check to see if we're updating.
+  if (db_result(db_query("SELECT COUNT(*) FROM {chargify_sites} WHERE nid = %d", $node->nid)) > 0) {
+    drupal_write_record('chargify_sites', $record, array('subscription_id'));
+  }
+  // Otherwise, write a new row.
+  else {
+    drupal_write_record('chargify_sites', $record);
+  }
+}
+
+/**
+ * Helper function to process loading a node.
+ */
+function chargify_sites_node_load(&$node) {
+  $ret = array();
+
+  $sql = "SELECT * FROM {chargify_subscriptions} sub INNER JOIN {chargify_sites} site ON sub.subscription_id = site.subscription_id WHERE site.nid = %d";
+  if ($subscription = db_fetch_object(db_query($sql, $node->nid))) {
+    $ret['subscription'] = $subscription;
+  }
+
+  return $ret;
 }

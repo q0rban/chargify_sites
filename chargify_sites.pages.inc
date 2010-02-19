@@ -48,7 +48,13 @@ function chargify_sites_settings_form() {
  */
 function chargify_sites_payment_page($node) {
   if ($node) {
-    return drupal_get_form('chargify_sites_payment_form', $node);
+    if (!(isset($node->subscription) && $node->subscription->state)) {
+      return drupal_get_form('chargify_sites_payment_form', $node);
+    }
+    else {
+      drupal_set_title(t("You're paid up!"));
+      return t('It looks like this site is already paid for.  Congrats!');
+    }
   }
   else {
     return t('Whoops, did you get here by accident?  Try going back to the <a href="!url">sign up page</a>.', array('!url' => url('node/add/site')));
@@ -100,6 +106,14 @@ function chargify_sites_payment_form(&$form_state, $node) {
       '#type' => 'hidden',
       '#value' => $user->mail,
     );
+
+    // The user object doesn't have the customer ID yet, so we need to load it.
+    if ($customer_id = chargify_uid_to_customer_id($user->uid)) {
+      $form['customer_id'] = array(
+        '#type' => 'hidden',
+        '#value' => $customer_id,
+      );
+    }
   }
 
   $form['cc'] = array(
@@ -200,21 +214,26 @@ function chargify_sites_payment_form_validate($form, &$form_state) {
 function chargify_sites_payment_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $node = $form['#node'];
-  $link = l($node->title, "node/{$node->nid}");
   global $user;
 
-  // We have an existing drupal user.
-  if (!user_is_anonymous()) {
-    $account = $user;
-  }
   // User is anonymous: create a new user.
-  else {
+  if (user_is_anonymous()) {
     $account = _chargify_sites_create_user($values['email']);
+  }
+  // We have an existing drupal user.
+  else {
+    $account = $user;
+    if (isset($values['customer_id'])) {
+      $account->customer_id = $values['customer_id'];
+      // Unset the customer ID so chargify.module doesn't try to add it again.
+      unset($values['customer_id']);
+    }
   }
 
   if ($account && $subscription = chargify_sites_create_subscription($values, $account, $node)) {
     // Update the node creator
     $node->uid = $account->uid;
+    $node->subscription->subscription_id = $subscription->getId();
     node_save($node);
     $form_state['redirect'] = "node/{$node->nid}";
   }
@@ -292,28 +311,25 @@ function _chargify_sites_create_user($mail) {
 
 function _chargify_sites_user_update(&$account, $subscription) {
   // Update the user if necessary
+  $array = array('subscriptions' => array($subscription));
+
   if (!isset($account->customer_id)) {
     $customer = $subscription->getCustomer();
-    $array = array(
-      'customer_id' => $customer->getID(),
-      'subscriptions' => array($subscription),
-    );
-    user_save($account, $array);
+    $array['customer_id'] = $customer->getID();
   }
-  else if (isset($account->subscriptions)) {
-    $record = chargify_subscription_save_record($subscription, $account->uid);
-    $account->subscriptions[$record->subscription_id] = $record;
-  }
+
+  user_save($account, $array);
 }
 
 function chargify_sites_create_subscription($values, $account, $node) {
   $success = TRUE;
+  $link = l($node->title, "node/{$node->nid}");
   $json = _chargify_sites_create_subscription($values, $account);
   $subscription = chargify_api_subscription_create($json, 'json');
 
   if (isset($subscription->error)) {
-    $message = "An error was detected during subscription:\n !error";
-    watchdog('chargify subscription', $message, array('!error' => $subscription->error), WATCHDOG_ERROR, $link);
+    $message = "An error was detected during subscription:<br /> !error";
+    watchdog('subscription', $message, array('!error' => print_r($subscription, 1)), WATCHDOG_ERROR, $link);
     $success = FALSE;
   }
   else if ($subscription->getState() == CHARGIFY_ACTIVE) {
@@ -322,13 +338,13 @@ function chargify_sites_create_subscription($values, $account, $node) {
       '!node' => $link,
       '!user_url' => url("user/{$account->uid}"),
     );
-    watchdog('chargify subscription', $message, $vars, WATCHDOG_INFO, $link);
+    watchdog('subscription', $message, $vars, WATCHDOG_INFO, $link);
 
     _chargify_sites_user_update($account, $subscription);
   }
   else {
-    $message = "An error was detected during subscription for !node.";
-    watchdog('chargify subscription', $message, array('!node' => $link), WATCHDOG_ERROR, $link);
+    $message = "An error was detected during subscription for !node:<br />!error";
+    watchdog('subscription', $message, array('!node' => $link, '!error' => print_r($subscription, 1)), WATCHDOG_ERROR, $link);
     $success = FALSE;
   }
 
