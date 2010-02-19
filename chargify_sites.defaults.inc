@@ -17,12 +17,12 @@ function _chargify_sites_content_default_fields() {
         'format' => 'hidden',
       ),
       'teaser' => array(
-        'format' => 'default',
-        'exclude' => 1,
+        'format' => 'hidden',
+        'exclude' => 0,
       ),
       'full' => array(
-        'format' => 'default',
-        'exclude' => 1,
+        'format' => 'hidden',
+        'exclude' => 0,
       ),
       '4' => array(
         'format' => 'default',
