@@ -1,0 +1,120 @@
+/* @override http://chargify/sites/all/modules/webgear/features/chargify_sites/chargify_sites.css?y */
+
+body.page-new-site form#node-form,
+#chargify-sites-payment-form div.login-register-wrapper {
+	margin-top: 24px;
+	padding: 18px 24px 24px;
+	border: 1px solid #cecece;
+	border-bottom-color: #a7a7a7;
+	color: #747474;
+	background: #f5f5f5 url(../images/bg_fieldset.png) repeat-x 0 bottom;
+	font: 12px/18px HelveticaNeue, "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+}
+
+body.page-new-site #edit-field-domain-0-url-wrapper {
+	border: 0;
+	padding: 0;
+	background: none;
+}
+
+body.page-new-site #edit-field-domain-0-url-wrapper label {
+	display: none;
+}
+
+body.page-new-site input#edit-field-domain-0-url {
+	font-size: 2em;
+	font-family: HelveticaNeue, "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif;
+	padding: 6px 10px;
+}
+
+body.page-new-site form#node-form input#edit-submit {
+	margin-top: 14px;
+	font-size: 1.5em;
+	border: solid 1px #cecece;
+	border-bottom-color: #999;
+	border-right-color: #999;
+	background: #fff;
+	padding: 8px 18px;
+	border-radius: 20px;
+	-webkit-border-radius: 20px;
+	-mozkit-border-radius: 20px;
+}
+
+body.page-new-site form#node-form input#edit-submit:hover {
+	background: #edffee;
+}
+
+body.page-new-site form#node-form input#edit-submit:active {
+	background: #d4ffd7;
+	border-color: #cecece;
+	border-top-color: #999;
+	border-left-color: #999;
+}
+
+/* @group Payment form */
+
+#chargify-sites-payment-form div.login-register-wrapper {
+	float: left;
+	margin-bottom: 10px;
+	width: 733px;
+}
+
+#chargify-sites-payment-form div.login-register-wrapper div.form-item {
+	background: none;
+}
+
+#chargify-sites-payment-form fieldset {
+	padding-top: 40px;
+}
+
+#chargify-sites-payment-form legend {
+	text-transform: none !important;
+	letter-spacing: 0;
+	font-size: 1.6em;
+}
+
+#chargify-sites-payment-form label {
+	text-transform: none;
+	font-weight: normal;
+	font-size: 1.1em;
+}
+
+#chargify-sites-payment-form fieldset.register,
+#chargify-sites-payment-form fieldset.login {
+	margin: 0;
+	width: 354px;
+	background: none;
+	border: none;
+	padding: 0;
+}
+
+#chargify-sites-payment-form fieldset.register legend,
+#chargify-sites-payment-form fieldset.login legend {
+	position: relative;
+	text-indent: -24px; /* TODO: figure out why this is happening */
+	top: 0;
+	text-transform: none !important;
+	letter-spacing: 0;
+	font-size: 1.6em;
+}
+
+#chargify-sites-payment-form input.form-text {
+	max-width: 340px;
+}
+
+#chargify-sites-payment-form fieldset.register {
+	float: left;
+}
+
+#chargify-sites-payment-form fieldset.login {
+	float: right;
+}
+
+#chargify-sites-payment-form fieldset.contact-info {
+	clear: left;
+}
+
+/* @end */

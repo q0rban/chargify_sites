@@ -1,0 +1,42 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ *   Holds db schema and install functions for Chargify Sites module.
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function chargify_sites_schema() {
+  $schema['chargify_sites'] = array(
+    'description' => t('Chargify Sites'),
+    'fields' => array(
+      'subscription_id' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The unique subscription ID within Chargify.',
+      ),
+      'nid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The Drupal node ID of the subscription.',
+      ),
+    ),
+    'primary key' => array('subscription_id'),
+    'unique key' => array('nid'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function chargify_sites_install() {
+  // Create tables.
+  drupal_install_schema('chargify_sites');
+}
