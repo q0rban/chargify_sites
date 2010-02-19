@@ -76,6 +76,7 @@ function chargify_sites_payment_form(&$form_state, $node) {
       '#title' => t('Create an account'),
       '#attributes' => array('class' => 'register'),
       '#tree' => TRUE,
+      '#prefix' => "<div class='login-register-wrapper'>",
     );
     $form['register']['mail'] = array(
       '#type' => 'textfield',
@@ -92,6 +93,7 @@ function chargify_sites_payment_form(&$form_state, $node) {
       '#title' => t('Login to an existing account'),
       '#attributes' => array('class' => 'login'),
       '#tree' => TRUE,
+      '#suffix' => "</div>",
     );
     $form['login']['mail'] = array(
       '#type' => 'textfield',
