@@ -123,60 +123,53 @@ function chargify_sites_payment_form(&$form_state, $node) {
     }
   }
 
-  $form['account'] = array(
+  $form['payment'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Contact info'),
-    '#attributes' => array('class' => 'contact-info'),
+    '#title' => t('Payment info'),
+    '#attributes' => array('class' => 'payment'),
   );
-
-  $form['account']['first_name'] = array(
+  $form['payment']['first_name'] = array(
     '#type' => 'textfield',
     '#title' => t('First Name'),
     '#default_value' => '',
     '#required' => TRUE,
   );
 
-  $form['account']['last_name'] = array(
+  $form['payment']['last_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Last Name'),
     '#default_value' => '',
     '#required' => TRUE,
   );
-
-  $form['cc'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Credit Card info'),
-    '#attributes' => array('class' => 'cc-info'),
-  );
-  $form['cc']['card_number'] = array(
+  $form['payment']['card_number'] = array(
     '#type' => 'textfield',
     '#title' => t('Credit Card Number'),
     '#required' => TRUE,
   );
-/*  $form['cc']['cvv'] = array(
+/*  $form['payment']['cvv'] = array(
     '#type' => 'textfield',
     '#title' => t('CVV'),
-    '#length' => 4,
+    '#size' => 4,
     '#maxlength' => 4,
     '#description' => t('The 3 or 4 digit verification number, usually on the back.')
   );
-  $form['cc']['billing_zip'] = array(
+  $form['payment']['billing_zip'] = array(
     '#type' => 'textfield',
     '#title' => t('Billing Zip Code'),
     '#maxlength' => 10,
     '#required' => TRUE,
   );*/
-  $form['cc']['expiration_month'] = array(
+  $form['payment']['expiration_month'] = array(
     '#type' => 'select',
     '#title' => t('Expiration'),
     '#options' => _chargify_sites_months(),
   );
-  $form['cc']['expiration_year'] = array(
+  $form['payment']['expiration_year'] = array(
     '#type' => 'select',
     '#options' => _chargify_sites_years(),
   );
 
-  $form['submit'] = array('#type' => 'submit', '#value' => t('Send my payment'));
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Build it!'));
 
   return $form;
 }

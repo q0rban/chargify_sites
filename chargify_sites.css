@@ -113,7 +113,7 @@ body.page-new-site form#node-form input#edit-submit:active {
 	float: right;
 }
 
-#chargify-sites-payment-form fieldset.contact-info {
+#chargify-sites-payment-form fieldset.payment {
 	clear: left;
 }
 
