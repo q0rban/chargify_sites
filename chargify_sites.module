@@ -33,6 +33,16 @@ function chargify_sites_menu() {
     'file' => 'chargify_sites.pages.inc',
   );
 
+  $items['new-site/%chargify_sites_product'] = array(
+    'title' => 'New Subscription',
+    'title callback' => 'chargify_sites_product_title',
+    'title arguments' => array(1),
+    'page callback' => 'chargify_sites_new_site_page',
+    'page arguments' => array(1),
+    'access arguments' => array('create site content'),
+    'file' => 'chargify_sites.pages.inc',
+  );
+
   $items['new-site/time-to-pay/%node'] = array(
     'title' => 'Payment',
     'title callback' => 'chargify_sites_payment_page_title',
@@ -55,6 +65,20 @@ function chargify_sites_menu() {
   );
 
   return $items;
+}
+
+/**
+ * Loads up a product by handle from Chargify.
+ */
+function chargify_sites_product_load($handle) {
+  return chargify_api_product_get($handle, 'handle');
+}
+
+/**
+ * Return a product title.
+ */
+function chargify_sites_product_title($product) {
+  return t($product->getName());
 }
 
 /**

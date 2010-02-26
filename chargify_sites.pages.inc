@@ -44,6 +44,13 @@ function chargify_sites_settings_form() {
 }
 
 /**
+ * Page callback for the New Site page.
+ */
+function chargify_sites_new_site_page($product) {
+  dsm($product);
+}
+
+/**
  * Page callback for the Payment page.
  */
 function chargify_sites_payment_page($node) {
