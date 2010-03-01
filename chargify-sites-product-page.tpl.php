@@ -3,7 +3,7 @@
     <div class="price">
       <?php print $price; ?>
     </div>
-    <p><?php print $description; ?></p>
+    <?php print $description; ?>
   </div>
   <div class="chargify-sites-product-form">
     <?php print $form_output; ?>
