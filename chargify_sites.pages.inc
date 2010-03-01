@@ -24,7 +24,7 @@ function chargify_sites_settings_form() {
   foreach(chargify_api_products_get() as $product) {
     $handle = $product->getHandle();
     $name = $product->getName();
-    $price = number_format(($product->getPriceInCents() / 100), 2); // Convert from price in cents.
+    $price = $product->getPriceInDollars();
 
     $args = array(
       '@name' => $name,
@@ -47,7 +47,26 @@ function chargify_sites_settings_form() {
  * Page callback for the New Site page.
  */
 function chargify_sites_new_site_page($product) {
-  dsm($product);
+  return theme('chargify_sites_product_page', $product);
+}
+
+/**
+ * Implementation of hook_preprocess_chargify_sites_product_page().
+ */
+function chargify_sites_preprocess_chargify_sites_product_page(&$vars) {
+  global $user;
+  $product = $vars['product'];
+
+  module_load_include('inc', 'node', 'node.pages');
+  $node_type = 'site';
+  $node = array('uid' => $user->uid, 'name' => (isset($user->name) ? $user->name : ''), 'type' => $node_type, 'language' => '');
+  $vars['form_output'] = drupal_get_form($node_type .'_node_form', $node);
+
+  $vars['price'] = theme('chargify_product_price', $product);
+
+  // Convert line breaks into p tags.
+  $text = _filter_autop($product->description);
+  $vars['description'] = t($text);
 }
 
 /**

@@ -71,7 +71,8 @@ function chargify_sites_menu() {
  * Loads up a product by handle from Chargify.
  */
 function chargify_sites_product_load($handle) {
-  return chargify_api_product_get($handle, 'handle');
+  $product = chargify_api_product_get($handle, 'handle');
+  return is_object($product) ? $product : FALSE;
 }
 
 /**
@@ -134,6 +135,20 @@ function chargify_sites_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 }
 
 /**
+ * Implementation of hook_theme().
+ */
+function chargify_sites_theme() {
+  $items = array();
+
+  $items['chargify_sites_product_page'] = array(
+    'arguments' => array('product' => NULL),
+    'template' => 'chargify-sites-product-page',
+  );
+
+  return $items;
+}
+
+/**
  * Implementation of hook_strongarm().
  */
 function chargify_sites_strongarm() {
@@ -141,6 +156,7 @@ function chargify_sites_strongarm() {
     'ant_site' => 1,
     'ant_pattern_site' => '[field_domain-url]',
     'user_email_verification' => FALSE,
+    'pathauto_node_site_pattern' => 'sites/[title-raw]',
   );
 }
 
@@ -163,7 +179,7 @@ function chargify_sites_content_extra_fields() {
 function chargify_sites_form_alter(&$form, $form_state, $form_id) {
   if ($form_id == 'site_node_form') {
     $form['buttons']['preview']['#access'] = FALSE;
-    $form['buttons']['submit']['#value'] = t('Buy it!');
+    $form['buttons']['submit']['#value'] = t('Continue');
   }
 }
 
