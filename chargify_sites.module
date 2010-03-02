@@ -3,15 +3,6 @@
 include_once('chargify_sites.features.inc');
 
 /**
- * Implementation of hook_enable().
- */
-function chargify_sites_enable() {
-  if (function_exists('path_set_alias')) {
-    path_set_alias('node/add/site', 'new-site');
-  }
-}
-
-/**
  * Implementation of hook_init().
  */
 function chargify_sites_init() {
@@ -95,7 +86,7 @@ function chargify_sites_payment_page_title($node) {
 function chargify_sites_payment_page_access($node, $account = NULL) {
   global $user;
   $account = is_null($account) ? $user : $account;
-  return ($node->uid == $account->uid);
+  return (function_exists('securepages_is_secure') && securepages_is_secure() && $node->uid == $account->uid);
 }
 
 /**
@@ -176,11 +167,9 @@ function chargify_sites_content_extra_fields() {
 /**
  * Implementation of hook_form_alter().
  */
-function chargify_sites_form_alter(&$form, $form_state, $form_id) {
-  if ($form_id == 'site_node_form') {
-    $form['buttons']['preview']['#access'] = FALSE;
-    $form['buttons']['submit']['#value'] = t('Continue');
-  }
+function chargify_sites_form_site_node_form_alter(&$form, $form_state) {
+  $form['buttons']['preview']['#access'] = FALSE;
+  $form['buttons']['submit']['#value'] = t('Continue');
 }
 
 /**
