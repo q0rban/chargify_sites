@@ -19,5 +19,4 @@ features[user][] = "view own page content"
 features[user][] = "view own site content"
 package = "Features"
 project = "chargify_sites"
-view own site content
 name = "Chargify Sites"
