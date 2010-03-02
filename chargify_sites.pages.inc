@@ -293,13 +293,6 @@ function chargify_sites_payment_form_submit($form, &$form_state) {
 }
 
 /**
- * Page callback for Thank you page.
- */
-function chargify_sites_paid_page($node) {
-  return t('Yay, @title is all paid up!', array('@title' => $node->title));
-}
-
-/**
  * Helper function to output an array of months.
  */
 function _chargify_sites_months() {

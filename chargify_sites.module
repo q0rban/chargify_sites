@@ -34,24 +34,15 @@ function chargify_sites_menu() {
     'file' => 'chargify_sites.pages.inc',
   );
 
-  $items['new-site/time-to-pay/%node'] = array(
+  $items['new-site/%node/time-to-pay'] = array(
     'title' => 'Payment',
     'title callback' => 'chargify_sites_payment_page_title',
-    'title arguments' => array(2),
+    'title arguments' => array(1),
     'description' => 'Configure settings',
     'page callback' => 'chargify_sites_payment_page',
-    'page arguments' => array(2),
+    'page arguments' => array(1),
     'access callback' => 'chargify_sites_payment_page_access',
-    'access arguments' => array(2),
-    'file' => 'chargify_sites.pages.inc',
-  );
-
-  $items['new-site/paid/%node'] = array(
-    'title' => 'Thanks!',
-    'description' => 'Configure settings',
-    'page callback' => 'chargify_sites_paid_page',
-    'page arguments' => array(2),
-    'access arguments' => array('create site content'),
+    'access arguments' => array(1),
     'file' => 'chargify_sites.pages.inc',
   );
 
@@ -103,7 +94,7 @@ function chargify_sites_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   if ($node->type == 'site' && $path = variable_get('chargify_sites_payment_page_hosted_path', '')) {
     switch ($op) {
       case 'insert':
-        $_REQUEST['destination'] = 'new-site/time-to-pay/'. $node->nid;
+        $_REQUEST['destination'] = 'new-site/'. $node->nid .'/time-to-pay';
       case 'update':
         if (isset($node->subscription->subscription_id)) {
           chargify_sites_node_save($node);
