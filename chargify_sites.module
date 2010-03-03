@@ -91,7 +91,7 @@ function chargify_sites_perm() {
  * Implementation of hook_nodeapi().
  */
 function chargify_sites_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
-  if ($node->type == 'site' && $path = variable_get('chargify_sites_payment_page_hosted_path', '')) {
+  if ($node->type == 'site') {
     switch ($op) {
       case 'insert':
         $_REQUEST['destination'] = 'new-site/'. $node->nid .'/time-to-pay';
