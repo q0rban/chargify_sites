@@ -367,13 +367,13 @@ function chargify_sites_create_subscription($values, $account, $node) {
     $success = FALSE;
   }
   else if ($subscription->getState() == CHARGIFY_ACTIVE) {
-    $message = "Successful subscription for !node by <a href='!user_url'>%customer</a>";
+    $message = "Successful subscription for !node by <a href='!user_url'>%customer</a>.";
     $vars = array(
       '!node' => $link,
       '!user_url' => url("user/{$account->uid}"),
     );
     watchdog('subscription', $message, $vars, WATCHDOG_INFO, $link);
-    drupal_set_message(t('Yay, it worked!  You are now all paid up on !title', array('!title' => $node->title)));
+    drupal_set_message(t('Yay! You are now all paid up on !title.', array('!title' => $node->title)));
 
     _chargify_sites_user_update($account, $subscription);
   }
