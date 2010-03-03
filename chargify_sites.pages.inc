@@ -54,6 +54,8 @@ function chargify_sites_new_site_page($product) {
  * Implementation of hook_preprocess_chargify_sites_product_page().
  */
 function chargify_sites_preprocess_chargify_sites_product_page(&$vars) {
+  drupal_add_js(drupal_get_path('module', 'chargify_sites') .'/fancyForm.css');
+
   global $user;
   $product = $vars['product'];
 
@@ -75,6 +77,7 @@ function chargify_sites_preprocess_chargify_sites_product_page(&$vars) {
 function chargify_sites_payment_page($node) {
   if ($node) {
     if (!(isset($node->subscription) && $node->subscription->state)) {
+      drupal_add_js(drupal_get_path('module', 'chargify_sites') .'/fancyForm.css');
       return drupal_get_form('chargify_sites_payment_form', $node);
     }
     else {
