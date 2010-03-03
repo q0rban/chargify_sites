@@ -210,6 +210,7 @@ function chargify_sites_node_load(&$node) {
  */
 function chargify_sites_node_delete(&$node) {
   if (isset($node->subscription->subscription_id)) {
+    chargify_subscription_delete_record($node->subscription->subscription_id);
     db_query("DELETE FROM {chargify_sites} WHERE nid = %d", $node->nid);
   }
 }
