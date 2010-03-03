@@ -112,6 +112,9 @@ function chargify_sites_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
           );
         }
         break;
+      case 'delete':
+        chargify_sites_node_delete($node);
+        break;
     }
   }
 }
@@ -200,4 +203,13 @@ function chargify_sites_node_load(&$node) {
   }
 
   return $ret;
+}
+
+/**
+ * Helper function to save a node.
+ */
+function chargify_sites_node_delete(&$node) {
+  if (isset($node->subscription->subscription_id)) {
+    db_query("DELETE FROM {chargify_sites} WHERE nid = %d", $node->nid);
+  }
 }
