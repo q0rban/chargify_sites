@@ -26,3 +26,12 @@ function chargify_sites_user_default_permissions() {
   $args = func_get_args();
   return call_user_func_array('_chargify_sites_user_default_permissions', $args);
 }
+
+/**
+ * Implementation of hook_views_default_views().
+ */
+function chargify_sites_views_default_views() {
+  module_load_include('inc', 'chargify_sites', 'chargify_sites.features.views');
+  $args = func_get_args();
+  return call_user_func_array('_chargify_sites_views_default_views', $args);
+}
