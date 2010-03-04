@@ -51,27 +51,6 @@ function chargify_sites_new_site_page($product) {
 }
 
 /**
- * Implementation of hook_preprocess_chargify_sites_product_page().
- */
-function chargify_sites_preprocess_chargify_sites_product_page(&$vars) {
-  drupal_add_js(drupal_get_path('module', 'chargify_sites') .'/fancyForm.css');
-
-  global $user;
-  $product = $vars['product'];
-
-  module_load_include('inc', 'node', 'node.pages');
-  $node_type = 'site';
-  $node = array('uid' => $user->uid, 'name' => (isset($user->name) ? $user->name : ''), 'type' => $node_type, 'language' => '');
-  $vars['form_output'] = drupal_get_form($node_type .'_node_form', $node);
-
-  $vars['price'] = theme('chargify_product_price', $product);
-
-  // Convert line breaks into p tags.
-  $text = _filter_autop($product->description);
-  $vars['description'] = t($text);
-}
-
-/**
  * Page callback for the Payment page.
  */
 function chargify_sites_payment_page($node) {
@@ -84,9 +63,6 @@ function chargify_sites_payment_page($node) {
       drupal_set_title(t("You're paid up!"));
       return t('It looks like this site is already paid for.  Congrats!');
     }
-  }
-  else {
-    return t('Whoops, did you get here by accident?  Try going back to the <a href="!url">sign up page</a>.', array('!url' => url('node/add/site')));
   }
 }
 
