@@ -1,11 +1,13 @@
 Drupal.behaviors.fancyFormDescriptions = function (context) {
-  $('div.form-item input', context).focus(function () {
+  var inputs = $('div.form-item input', context);
+  inputs.parents('div.form-item:first').find('div.description').hide();
+
+  inputs.focus(function () {
     $(this).parents('div.form-item:first').find('div.description').show('fast');
   })
   .blur(function () {
     $(this).parents('div.form-item:first').find('div.description').hide('fast');
-  })
-  .blur();
+  });
 };
 
 Drupal.behaviors.fancyFormLabels = function (context) {
