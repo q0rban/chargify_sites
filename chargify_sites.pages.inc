@@ -171,11 +171,12 @@ function chargify_sites_payment_form(&$form_state, $node) {
     '#type' => 'select',
     '#title' => t('Expiration'),
     '#options' => _chargify_sites_months(),
+    '#prefix' => '<div class="expiration">',
   );
   $form['payment']['expiration_year'] = array(
     '#type' => 'select',
     '#options' => _chargify_sites_years(),
-    '#suffix' => '</div>',
+    '#suffix' => '</div></div>',
   );
 
   $form['submit'] = array('#type' => 'submit', '#value' => t('Build it!'));
