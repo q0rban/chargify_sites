@@ -145,7 +145,7 @@
 #chargify-sites-payment-form div.payment #edit-card-number-wrapper,
 #chargify-sites-payment-form div.expiration {
 	float: left;
-	width: 305px;
+	width: 310px;
 }
 
 #chargify-sites-payment-form div.payment div.name #edit-last-name-wrapper,
@@ -173,7 +173,7 @@
 
 /* @end */
 
-#chargify-sites-payment-form div.expiration {
-	padding-bottom: 20px;
-	background: url(visa-mastercard.png) no-repeat 100% 100%;
+#chargify-sites-payment-form #edit-card-number-wrapper {
+	padding-bottom: 47px;
+	background: url(visa-mastercard.png) no-repeat 0 100%;
 }
