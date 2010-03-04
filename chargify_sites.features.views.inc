@@ -146,12 +146,16 @@ function _chargify_sites_views_default_views() {
     ),
   ));
   $handler->override_option('access', array(
-    'type' => 'perm',
-    'perm' => 'create site content',
+    'type' => 'role',
+    'role' => array(
+      '2' => 2,
+    ),
   ));
   $handler->override_option('cache', array(
     'type' => 'none',
   ));
+  $handler->override_option('empty', 'There are no sites currently associated with this account.');
+  $handler->override_option('empty_format', '6');
   $handler->override_option('style_plugin', 'table');
   $handler = $view->new_display('page', 'Page', 'page_1');
   $handler->override_option('path', 'my-sites');
