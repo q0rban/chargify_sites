@@ -1,7 +1,33 @@
-/* @override http://readysitebuild.com/sites/default/modules/chargify_sites/chargify_sites.css?9 */
+/* @override 
+	http://readysitebuild.com/sites/default/modules/chargify_sites/chargify_sites.css?L
+	https://readysitebuild.com/sites/default/modules/chargify_sites/chargify_sites.css?L
+*/
 
-body.page-new-site form#node-form,
-#chargify-sites-payment-form div.login-register-wrapper {
+/* @group Payment Page */
+
+#chargify-sites-product-page div.chargify-sites-product-description {
+	font-size: 1.2em;
+	line-height: 1.5em;
+}
+
+#chargify-sites-product-page div.chargify-sites-product-description div.chargify-product-price {
+	font-size: 1.2em;
+	float: right;
+	text-align: right;
+	line-height: 1.5em;
+	padding: 0 0 12px 12px;
+}
+
+#chargify-sites-product-page div.chargify-sites-product-description div.chargify-product-price span.price {
+	font-size: 1.5em;
+	display: block;
+	font-weight: bold;
+}
+
+#chargify-sites-product-page form#node-form,
+#chargify-sites-payment-form div.login-register-wrapper,
+#chargify-sites-payment-form div.payment {
+	clear: right;
 	margin-top: 24px;
 	padding: 18px 24px 24px;
 	border: 1px solid #cecece;
@@ -14,46 +40,52 @@ body.page-new-site form#node-form,
 	border-radius: 5px;
 }
 
-body.page-new-site input#edit-field-domain-0-url,
-body.page-new-site form#node-form input#edit-captcha-response {
+#chargify-sites-product-page input#edit-field-domain-0-url,
+#chargify-sites-product-page form#node-form input#edit-captcha-response {
 	font-size: 2em;
 	font-family: HelveticaNeue, "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif;
 	padding: 6px 10px;
 	width: 458px;
 }
 
-body.page-new-site form#node-form input#edit-submit {
+#chargify-sites-product-page form#node-form input#edit-submit {
 	font-size: 1.3em;
 	padding: 6px 16px 8px;
 }
 
-body.page-new-site form#node-form input#edit-submit:hover {
+#chargify-sites-product-page form#node-form input#edit-submit:hover {
 	background: #2a7f9b;
 }
 
-body.page-new-site form#node-form #edit-captcha-response-wrapper span.field-prefix,
-body.page-new-site form#node-form input#edit-captcha-response {
+#chargify-sites-product-page form#node-form #edit-captcha-response-wrapper span.field-prefix,
+#chargify-sites-product-page form#node-form input#edit-captcha-response {
 	color: #000;
 	font-size: 1.5em;
 }
 
-body.page-new-site form#node-form input#edit-captcha-response {
+#chargify-sites-product-page form#node-form #edit-captcha-response-wrapper label {
+	display: none;
+}
+
+#chargify-sites-product-page form#node-form input#edit-captcha-response {
 	width: 25px;
 }
+
+/* @end */
 
 /* @group Payment form */
 
 #chargify-sites-payment-form div.login-register-wrapper {
 	float: left;
 	margin-bottom: 10px;
-	width: 733px;
+	width: 630px;
 }
 
 #chargify-sites-payment-form div.login-register-wrapper div.form-item {
 	background: none;
 }
 
-#chargify-sites-payment-form fieldset {
+#chargify-sites-payment-form div.fieldset {
 	padding-top: 40px;
 }
 
@@ -69,17 +101,17 @@ body.page-new-site form#node-form input#edit-captcha-response {
 	font-size: 1.1em;
 }
 
-#chargify-sites-payment-form fieldset.register,
-#chargify-sites-payment-form fieldset.login {
+#chargify-sites-payment-form div.register,
+#chargify-sites-payment-form div.login {
 	margin: 0;
-	width: 354px;
+	width: 315px;
 	background: none;
 	border: none;
 	padding: 0;
 }
 
-#chargify-sites-payment-form fieldset.register legend,
-#chargify-sites-payment-form fieldset.login legend {
+#chargify-sites-payment-form div.register legend,
+#chargify-sites-payment-form div.login legend {
 	position: relative;
 	text-indent: -24px; /* TODO: figure out why this is happening */
 	top: 0;
@@ -92,15 +124,15 @@ body.page-new-site form#node-form input#edit-captcha-response {
 	max-width: 340px;
 }
 
-#chargify-sites-payment-form fieldset.register {
+#chargify-sites-payment-form div.register {
 	float: left;
 }
 
-#chargify-sites-payment-form fieldset.login {
+#chargify-sites-payment-form div.login {
 	float: right;
 }
 
-#chargify-sites-payment-form fieldset.payment {
+#chargify-sites-payment-form div.payment {
 	clear: left;
 }
 
