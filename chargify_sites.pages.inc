@@ -153,6 +153,7 @@ function chargify_sites_payment_form(&$form_state, $node) {
     '#title' => t('Credit Card Number'),
     '#required' => TRUE,
     '#prefix' => '<div class="cc-info">',
+    '#attributes' => array('autocomplete' => 'off'),
   );
 /*  $form['payment']['cvv'] = array(
     '#type' => 'textfield',
