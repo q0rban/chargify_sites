@@ -1,6 +1,6 @@
 /* @override 
-	http://readysitebuild.com/sites/default/modules/chargify_sites/chargify_sites.css?L
-	https://readysitebuild.com/sites/default/modules/chargify_sites/chargify_sites.css?L
+	http://readysitebuild.com/sites/default/modules/chargify_sites/chargify_sites.css?b
+	https://readysitebuild.com/sites/default/modules/chargify_sites/chargify_sites.css?b
 */
 
 /* @group Payment Page */
@@ -170,4 +170,10 @@
 #chargify-sites-payment-form input.form-submit {
 	clear: both;
 }
+
 /* @end */
+
+#chargify-sites-payment-form div.expiration {
+	padding-bottom: 20px;
+	background: url(visa-mastercard.png) no-repeat 100% 100%;
+}
