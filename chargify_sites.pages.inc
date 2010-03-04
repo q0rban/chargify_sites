@@ -56,7 +56,7 @@ function chargify_sites_new_site_page($product) {
 function chargify_sites_payment_page($node) {
   if ($node) {
     if (!(isset($node->subscription) && $node->subscription->state)) {
-      drupal_add_js(drupal_get_path('module', 'chargify_sites') .'/fancyForm.css');
+      drupal_add_js(drupal_get_path('module', 'chargify_sites') .'/fancyForm.js');
       return drupal_get_form('chargify_sites_payment_form', $node);
     }
     else {

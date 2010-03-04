@@ -179,7 +179,7 @@ function chargify_sites_theme_settings() {
  * Implementation of hook_preprocess_chargify_sites_product_page().
  */
 function chargify_sites_preprocess_chargify_sites_product_page(&$vars) {
-  drupal_add_js(drupal_get_path('module', 'chargify_sites') .'/fancyForm.css');
+  drupal_add_js(drupal_get_path('module', 'chargify_sites') .'/fancyForm.js');
 
   global $user;
   $product = $vars['product'];
