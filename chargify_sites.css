@@ -8,6 +8,7 @@
 #chargify-sites-product-page div.chargify-sites-product-description {
 	font-size: 1.2em;
 	line-height: 1.5em;
+	margin-bottom: 18px;
 }
 
 #chargify-sites-product-page div.chargify-sites-product-description div.chargify-product-price {
@@ -28,7 +29,6 @@
 #chargify-sites-payment-form div.login-register-wrapper,
 #chargify-sites-payment-form div.payment {
 	clear: right;
-	margin-top: 24px;
 	padding: 18px 24px 24px;
 	border: 1px solid #cecece;
 	border-bottom-color: #a7a7a7;
@@ -74,6 +74,10 @@
 /* @end */
 
 /* @group Payment form */
+
+#chargify-sites-payment-form h2.fieldset-title {
+	font-size: 1.2em;
+}
 
 #chargify-sites-payment-form div.login-register-wrapper {
 	float: left;
@@ -136,4 +140,34 @@
 	clear: left;
 }
 
+#chargify-sites-payment-form div.payment #edit-first-name-wrapper,
+#chargify-sites-payment-form div.payment #edit-last-name-wrapper,
+#chargify-sites-payment-form div.payment #edit-card-number-wrapper,
+#chargify-sites-payment-form div.expiration {
+	float: left;
+	width: 305px;
+}
+
+#chargify-sites-payment-form div.payment div.name #edit-last-name-wrapper,
+#chargify-sites-payment-form div.expiration {
+	float: right;
+}
+
+#chargify-sites-payment-form div.payment div.cc-info {
+	clear: left;
+}
+
+#chargify-sites-payment-form #edit-expiration-month-wrapper label {
+	display: none;
+}
+
+#chargify-sites-payment-form #edit-expiration-month-wrapper,
+#chargify-sites-payment-form #edit-expiration-year-wrapper {
+	width: 150px;
+	float: left;
+}
+
+#chargify-sites-payment-form input.form-submit {
+	clear: both;
+}
 /* @end */
