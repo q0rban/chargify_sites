@@ -138,6 +138,7 @@ function chargify_sites_payment_form(&$form_state, $node) {
     '#title' => t('First Name'),
     '#default_value' => '',
     '#required' => TRUE,
+    '#prefix' => '<div class="name">',
   );
 
   $form['payment']['last_name'] = array(
@@ -145,11 +146,13 @@ function chargify_sites_payment_form(&$form_state, $node) {
     '#title' => t('Last Name'),
     '#default_value' => '',
     '#required' => TRUE,
+    '#suffix' => '</div>',
   );
   $form['payment']['card_number'] = array(
     '#type' => 'textfield',
     '#title' => t('Credit Card Number'),
     '#required' => TRUE,
+    '#prefix' => '<div class="cc-info">',
   );
 /*  $form['payment']['cvv'] = array(
     '#type' => 'textfield',
@@ -172,6 +175,7 @@ function chargify_sites_payment_form(&$form_state, $node) {
   $form['payment']['expiration_year'] = array(
     '#type' => 'select',
     '#options' => _chargify_sites_years(),
+    '#suffix' => '</div>',
   );
 
   $form['submit'] = array('#type' => 'submit', '#value' => t('Build it!'));
