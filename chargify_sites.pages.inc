@@ -265,7 +265,7 @@ function chargify_sites_payment_form_submit($form, &$form_state) {
     unset($values['customer_id']);
   }
 
-  if ($account && $subscription = chargify_sites_create_subscription($values, $account, $node)) {
+  if ($account && $subscription = chargify_sites_subscription_create($values, $account, $node)) {
     // Update the node creator
     $node->uid = $account->uid;
     $node->subscription->subscription_id = $subscription->getId();
@@ -337,32 +337,32 @@ function _chargify_sites_user_update(&$account, $subscription) {
 /**
  * Creates a subscription for a node and user.
  */
-function chargify_sites_create_subscription($values, $account, $node) {
+function chargify_sites_subscription_create($values, $account, $node) {
   $success = TRUE;
   $link = l($node->title, "node/{$node->nid}");
-  $json = _chargify_sites_create_subscription($values, $account);
-  $subscription = chargify_api_subscription_create($json, 'json');
-
-  if (isset($subscription->error)) {
-    $message = "An error was detected during subscription:<br /> !error";
-    watchdog('subscription', $message, array('!error' => print_r($subscription, 1)), WATCHDOG_ERROR, $link);
-    $success = FALSE;
+  $json = _chargify_sites_subscription_create($values, $account);
+  if ($subscription = chargify_api_subscription_create($json, 'json')) {
+    if (isset($subscription->error)) {
+      $success = FALSE;
+    }
+    else if ($subscription->getState() == CHARGIFY_ACTIVE) {
+      $message = "Successful subscription for !node by <a href='!user_url'>%customer</a>.";
+      $vars = array(
+        '!node' => $link,
+        '!user_url' => url("user/{$account->uid}"),
+      );
+      watchdog('subscription', $message, $vars, WATCHDOG_INFO, $link);
+      drupal_set_message(t('Yay! You are now all paid up on !title.', array('!title' => $node->title)));
+  
+      _chargify_sites_user_update($account, $subscription);
+    }
+    else {
+      $success = FALSE;
+    }
   }
-  else if ($subscription->getState() == CHARGIFY_ACTIVE) {
-    $message = "Successful subscription for !node by <a href='!user_url'>%customer</a>.";
-    $vars = array(
-      '!node' => $link,
-      '!user_url' => url("user/{$account->uid}"),
-    );
-    watchdog('subscription', $message, $vars, WATCHDOG_INFO, $link);
-    drupal_set_message(t('Yay! You are now all paid up on !title.', array('!title' => $node->title)));
-
-    _chargify_sites_user_update($account, $subscription);
-  }
-  else {
+  if (!$success) {
     $message = "An error was detected during subscription for !node:<br />!error";
     watchdog('subscription', $message, array('!node' => $link, '!error' => print_r($subscription, 1)), WATCHDOG_ERROR, $link);
-    $success = FALSE;
   }
 
   return $success ? $subscription : FALSE;
@@ -378,7 +378,7 @@ function chargify_sites_create_subscription($values, $account, $node) {
  * @return
  *   json data to post to chargify.
  */
-function _chargify_sites_create_subscription($values, $account) {
+function _chargify_sites_subscription_create($values, $account) {
   $object = new stdClass();
 
   $object->subscription->product_handle = 'basic';
