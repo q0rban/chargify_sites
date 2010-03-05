@@ -77,7 +77,7 @@ function chargify_sites_payment_page_title($node) {
 function chargify_sites_payment_page_access($node, $account = NULL) {
   global $user;
   $account = is_null($account) ? $user : $account;
-  return (function_exists('securepages_is_secure') && securepages_is_secure() && $node->uid == $account->uid);
+  return ($node->uid == $account->uid);
 }
 
 /**

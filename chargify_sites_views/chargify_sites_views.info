@@ -1,0 +1,6 @@
+; $Id$
+name = Chargify Sites Views
+description = Views Integration with Chargify Sites
+dependencies[] = chargify_sites
+package = Chargify
+core = 6.x

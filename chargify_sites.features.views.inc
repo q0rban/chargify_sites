@@ -17,6 +17,16 @@ function _chargify_sites_views_default_views() {
   $view->api_version = 2;
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   $handler = $view->new_display('default', 'Defaults', 'default');
+  $handler->override_option('relationships', array(
+    'subscription_id' => array(
+      'label' => 'Chargify Subscription',
+      'required' => 1,
+      'id' => 'subscription_id',
+      'table' => 'chargify_sites',
+      'field' => 'subscription_id',
+      'relationship' => 'none',
+    ),
+  ));
   $handler->override_option('fields', array(
     'title' => array(
       'label' => 'Domain name',
@@ -84,6 +94,35 @@ function _chargify_sites_views_default_views() {
         'button' => 'Override',
       ),
       'relationship' => 'none',
+    ),
+    'state_name' => array(
+      'label' => 'State',
+      'alter' => array(
+        'alter_text' => 0,
+        'text' => '',
+        'make_link' => 0,
+        'path' => '',
+        'link_class' => '',
+        'alt' => '',
+        'prefix' => '',
+        'suffix' => '',
+        'target' => '',
+        'help' => '',
+        'trim' => 0,
+        'max_length' => '',
+        'word_boundary' => 1,
+        'ellipsis' => 1,
+        'strip_tags' => 0,
+        'html' => 0,
+      ),
+      'empty' => '',
+      'hide_empty' => 0,
+      'empty_zero' => 0,
+      'exclude' => 0,
+      'id' => 'state_name',
+      'table' => 'chargify_subscriptions',
+      'field' => 'state_name',
+      'relationship' => 'subscription_id',
     ),
   ));
   $handler->override_option('sorts', array(

@@ -1,0 +1,17 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ *   Views implementations for Chargify Sites
+ *   Built by Sprocket.
+ */
+
+/**
+ * Implementation of hook_views_api().
+ */
+function chargify_sites_views_views_api() {
+  return array(
+    'api' => 2,
+  );
+}

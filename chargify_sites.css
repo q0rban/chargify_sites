@@ -1,6 +1,6 @@
 /* @override 
-	http://readysitebuild.com/sites/default/modules/chargify_sites/chargify_sites.css?b
-	https://readysitebuild.com/sites/default/modules/chargify_sites/chargify_sites.css?b
+	http://readysitebuild.com/sites/default/modules/chargify_sites/chargify_sites.css?C
+	https://readysitebuild.com/sites/default/modules/chargify_sites/chargify_sites.css?C
 */
 
 /* @group Payment Page */
@@ -179,9 +179,33 @@
 	clear: both;
 }
 
-/* @end */
-
 #chargify-sites-payment-form #edit-card-number-wrapper {
 	padding-bottom: 47px;
 	background: url(visa-mastercard.png) no-repeat 0 100%;
 }
+
+/* @end */
+
+/* @group States */
+
+div.chargify-state {
+	font-size: 1.2em;
+	display: inline;
+	background: #ccc;
+	border-radius: 14px;
+	-webkit-border-radius: 14px;
+	-moz-border-radius: 14px;
+	padding: 5px 10px;
+	border: solid 1px #999;
+	border-top: 0;
+	border-left: 0;
+}
+
+div.chargify-state-active {
+	background-color: #aeffc0;
+	border-color: #90d39f;
+	text-transform: uppercase;
+}
+
+/* @end */
+
