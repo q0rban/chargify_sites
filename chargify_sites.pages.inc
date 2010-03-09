@@ -328,7 +328,7 @@ function _chargify_sites_user_update(&$account, $subscription) {
 
   if (!isset($account->customer_id)) {
     $customer = $subscription->getCustomer();
-    $array['customer_id'] = $customer->getID();
+    $array['customer_id'] = $customer->getId();
   }
 
   user_save($account, $array);
