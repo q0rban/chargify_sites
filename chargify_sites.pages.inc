@@ -350,6 +350,7 @@ function chargify_sites_subscription_create($values, $account, $node) {
       $vars = array(
         '!node' => $link,
         '!user_url' => url("user/{$account->uid}"),
+        '%customer' => $account->name,
       );
       watchdog('subscription', $message, $vars, WATCHDOG_INFO, $link);
       drupal_set_message(t('Yay! You are now all paid up on !title.', array('!title' => $node->title)));
