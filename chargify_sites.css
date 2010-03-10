@@ -1,9 +1,6 @@
-/* @override 
-	http://readysitebuild.com/sites/default/modules/chargify_sites/chargify_sites.css?O
-	https://readysitebuild.com/sites/default/modules/chargify_sites/chargify_sites.css?O
-*/
+/* @override http://chargify/sites/all/modules/webgear/features/chargify_sites/chargify_sites.css?K */
 
-/* @group Payment Page */
+/* @group Product Page */
 
 #chargify-sites-product-page div.chargify-sites-product-description {
 	font-size: 1.2em;
@@ -48,9 +45,15 @@
 	width: 458px;
 }
 
+#chargify-sites-product-page form#node-form div.chargify-sites-tos {
+	line-height: 35px;
+}
+
 #chargify-sites-product-page form#node-form input#edit-submit {
 	font-size: 1.3em;
 	padding: 6px 16px 8px;
+	margin-right: 12px;
+	float: left;
 }
 
 #chargify-sites-product-page form#node-form input#edit-submit:hover {

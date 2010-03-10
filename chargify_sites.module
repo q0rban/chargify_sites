@@ -134,6 +134,9 @@ function chargify_sites_theme() {
     'arguments' => array('product' => NULL),
     'template' => 'chargify-sites-product-page',
   );
+  $items['chargify_sites_tos'] = array(
+    'arguments' => array('url' => NULL),
+  );
 
   return $items;
 }
@@ -169,6 +172,9 @@ function chargify_sites_content_extra_fields() {
 function chargify_sites_form_site_node_form_alter(&$form, $form_state) {
   $form['buttons']['preview']['#access'] = FALSE;
   $form['buttons']['submit']['#value'] = t('Continue');
+  if ($tos_path = variable_get('chargify_sites_tos', '')) {
+    $form['buttons']['submit']['#suffix'] = theme('chargify_sites_tos', $tos_path);
+  }
 }
 
 /**
@@ -199,6 +205,17 @@ function chargify_sites_preprocess_chargify_sites_product_page(&$vars) {
   // Convert line breaks into p tags.
   $text = _filter_autop($product->description);
   $vars['description'] = t($text);
+}
+
+/**
+ * Theme function for displaying the TOS text.
+ */
+function theme_chargify_sites_tos($url) {
+  $output = "<div class='chargify-sites-tos'>\n";
+  $output .= t('By submitting this form, you are agreeing to the <a href="!url">Terms of Service</a>.', array('!url' => url($url)));
+  $output .= "</div>\n";
+
+  return $output;
 }
 
 /**

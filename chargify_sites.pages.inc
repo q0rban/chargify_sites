@@ -12,6 +12,7 @@
 function chargify_sites_settings_form() {
   $form = array();
 
+  /*
   $form['chargify_sites_products'] = array(
     '#tree' => TRUE,
     '#type' => 'fieldset',
@@ -37,10 +38,37 @@ function chargify_sites_settings_form() {
       '#default_value' => $products[$handle],
     );
   }
+  */
+  $form['chargify_sites_tos'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Terms of Service URL'),
+    '#default_value' => variable_get('chargify_sites_tos', ''),
+    '#size' => 40,
+    '#description' => t('Specify the relative URL to the Terms of Service page.'),
+    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q='),
+  );
+  $form['#validate'][] = 'chargify_sites_settings_form_validate';
 
   $form = system_settings_form($form);
 
   return $form;
+}
+
+/**
+ * Validation handler for chargify_sites_settings_form.
+ */
+function chargify_sites_settings_form_validate($form, &$form_state) {
+  // Validate front page path.
+  $item = array('link_path' => $form_state['values']['chargify_sites_tos']);
+  $normal_path = drupal_get_normal_path($item['link_path']);
+  if ($item['link_path'] != $normal_path) {
+    $args = array('%link_path' => $item['link_path'], '%normal_path' => $normal_path);
+    drupal_set_message(t('The menu system stores system paths only, but will use the URL alias for display. %link_path has been stored as %normal_path', $args));
+    $item['link_path'] = $normal_path;
+  }
+  if (!empty($item) && !menu_valid_path($item)) {
+    form_set_error('chargify_sites_tos', t("The path '@path' is either invalid or you do not have access to it.", array('@path' => $item['link_path'])));
+  }
 }
 
 /**
