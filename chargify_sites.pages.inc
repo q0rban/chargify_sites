@@ -61,7 +61,7 @@ function chargify_sites_payment_page($node) {
     }
     else {
       drupal_set_title(t("You're paid up!"));
-      return t('It looks like this site is already paid for.  Congrats!');
+      return t('It looks like this site is already paid for. Congrats!');
     }
   }
 }
