@@ -212,7 +212,7 @@ function chargify_sites_preprocess_chargify_sites_product_page(&$vars) {
  */
 function theme_chargify_sites_tos($url) {
   $output = "<div class='chargify-sites-tos'>\n";
-  $output .= t('By submitting this form, you are agreeing to the <a href="!url">Terms of Service</a>.', array('!url' => url($url)));
+  $output .= t('By submitting this form, you are agreeing to the <a href="!url" target="_blank">Terms of Service</a>.', array('!url' => url($url)));
   $output .= "</div>\n";
 
   return $output;
