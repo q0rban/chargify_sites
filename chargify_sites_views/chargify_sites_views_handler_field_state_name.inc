@@ -24,7 +24,6 @@ class chargify_sites_views_handler_field_state_name extends views_handler_field 
 
     $node = new stdClass();
     $node->nid = $values->{$this->aliases['nid']};
-    drupal_set_message(print_r($this, 1));
     $node->uid = $values->users_uid;
 
     return $state ? theme('chargify_subscription_state', $state) : theme('chargify_sites_payment_link', $node);
