@@ -6,7 +6,7 @@
 function _chargify_sites_views_default_views() {
   $views = array();
 
-  // Exported view: chargify_sites_mine
+  // Exported view: chargify_sites
   $view = new view;
   $view->name = 'chargify_sites';
   $view->description = 'Chargify Sites';
@@ -20,11 +20,14 @@ function _chargify_sites_views_default_views() {
   $handler->override_option('relationships', array(
     'subscription_id' => array(
       'label' => 'Chargify Subscription',
-      'required' => 1,
+      'required' => 0,
       'id' => 'subscription_id',
       'table' => 'chargify_sites',
       'field' => 'subscription_id',
       'relationship' => 'none',
+      'override' => array(
+        'button' => 'Override',
+      ),
     ),
   ));
   $handler->override_option('fields', array(
@@ -169,6 +172,23 @@ function _chargify_sites_views_default_views() {
       'field' => 'type',
       'relationship' => 'none',
     ),
+    'uid_current' => array(
+      'operator' => '=',
+      'value' => '1',
+      'group' => '0',
+      'exposed' => FALSE,
+      'expose' => array(
+        'operator' => FALSE,
+        'label' => '',
+      ),
+      'id' => 'uid_current',
+      'table' => 'users',
+      'field' => 'uid_current',
+      'override' => array(
+        'button' => 'Override',
+      ),
+      'relationship' => 'none',
+    ),
   ));
   $handler->override_option('access', array(
     'type' => 'role',
@@ -181,6 +201,8 @@ function _chargify_sites_views_default_views() {
   ));
   $handler->override_option('empty', 'There are no sites currently associated with this account.');
   $handler->override_option('empty_format', '6');
+  $handler->override_option('use_ajax', TRUE);
+  $handler->override_option('use_pager', '1');
   $handler->override_option('style_plugin', 'table');
   $handler = $view->new_display('page', 'My Sites Page', 'page_1');
   $handler->override_option('path', 'my-sites');
@@ -367,6 +389,38 @@ function _chargify_sites_views_default_views() {
       'relationship' => 'subscription_id',
     ),
   ));
+  $handler->override_option('filters', array(
+    'status' => array(
+      'operator' => '=',
+      'value' => '1',
+      'group' => '0',
+      'exposed' => FALSE,
+      'expose' => array(
+        'operator' => FALSE,
+        'label' => '',
+      ),
+      'id' => 'status',
+      'table' => 'node',
+      'field' => 'status',
+      'relationship' => 'none',
+    ),
+    'type' => array(
+      'operator' => 'in',
+      'value' => array(
+        'site' => 'site',
+      ),
+      'group' => '0',
+      'exposed' => FALSE,
+      'expose' => array(
+        'operator' => FALSE,
+        'label' => '',
+      ),
+      'id' => 'type',
+      'table' => 'node',
+      'field' => 'type',
+      'relationship' => 'none',
+    ),
+  ));
   $handler->override_option('access', array(
     'type' => 'perm',
     'perm' => 'administer chargify',
@@ -377,8 +431,8 @@ function _chargify_sites_views_default_views() {
     'type' => 'normal',
     'title' => 'Chargify Sites',
     'description' => '',
-    'weight' => '0',
-    'name' => 'navigation',
+    'weight' => '8',
+    'name' => 'primary-links',
   ));
   $handler->override_option('tab_options', array(
     'type' => 'none',
