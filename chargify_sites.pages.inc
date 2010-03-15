@@ -382,6 +382,9 @@ function chargify_sites_subscription_create($values, $account, $node) {
           drupal_set_message(t($error), 'error');
         }
       }
+      elseif (is_string($subscription->error)) {
+        drupal_set_message(t($subscription->error), 'error');
+      }
     }
     // Make sure the subscription is Active.
     else if ($subscription->getState() == CHARGIFY_ACTIVE) {
