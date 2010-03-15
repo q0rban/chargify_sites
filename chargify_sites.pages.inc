@@ -377,13 +377,8 @@ function chargify_sites_subscription_create($values, $account, $node) {
     // Check for errors.
     if (isset($subscription->error)) {
       $success = FALSE;
-      if (is_array($subscription->error)) {
-        foreach($subscription->error as $error) {
-          drupal_set_message(t($error), 'error');
-        }
-      }
-      elseif (is_string($subscription->error)) {
-        drupal_set_message(t($subscription->error), 'error');
+      foreach($subscription->children() as $error) {
+        drupal_set_message(t((string) $error), 'error');
       }
     }
     // Make sure the subscription is Active.
@@ -408,7 +403,7 @@ function chargify_sites_subscription_create($values, $account, $node) {
 
   // Watchdog entry for non-success.
   if (!$success) {
-    $message = "An error was detected during subscription for !node:<br />!error";
+    $message = "An error was detected during subscription for !node:<br /><pre>!error</pre>";
     watchdog('subscription', $message, array('!node' => $link, '!error' => print_r($subscription, 1)), WATCHDOG_ERROR, $link);
   }
 
