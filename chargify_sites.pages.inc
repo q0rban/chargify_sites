@@ -299,7 +299,7 @@ function chargify_sites_payment_form_submit($form, &$form_state) {
     $form_state['redirect'] = "node/{$node->nid}";
   }
   else {
-    drupal_set_message(t("Hmm. Something didn't work right. You might want to contact an administrator."), 'error');
+    drupal_set_message(t("Hmm. Something didn't work right. Can you please verify everything and try again?"), 'error');
   }
 
   // Update the node creator
