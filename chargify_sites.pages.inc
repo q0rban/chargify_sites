@@ -372,10 +372,18 @@ function chargify_sites_subscription_create($values, $account, $node) {
   $success = TRUE;
   $link = l($node->title, "node/{$node->nid}");
   $json = _chargify_sites_subscription_create($values, $account);
+
   if ($subscription = chargify_api_subscription_create($json, 'json')) {
+    // Check for errors.
     if (isset($subscription->error)) {
       $success = FALSE;
+      if (is_array($subscription->error)) {
+        foreach($subscription->error as $error) {
+          drupal_set_message(t($error), 'error');
+        }
+      }
     }
+    // Make sure the subscription is Active.
     else if ($subscription->getState() == CHARGIFY_ACTIVE) {
       $message = "Successful subscription for !node by <a href='!user_url'>%customer</a>.";
       $vars = array(
@@ -388,10 +396,14 @@ function chargify_sites_subscription_create($values, $account, $node) {
   
       _chargify_sites_user_update($account, $subscription);
     }
+    // Otherwise we have a subscription in some other state. Notify the user.
     else {
       $success = FALSE;
+      drupal_set_message(t('This subscription state is currently %state.', array('%state' => chargify_subscription_state($subscription->getState()))));
     }
   }
+
+  // Watchdog entry for non-success.
   if (!$success) {
     $message = "An error was detected during subscription for !node:<br />!error";
     watchdog('subscription', $message, array('!node' => $link, '!error' => print_r($subscription, 1)), WATCHDOG_ERROR, $link);
