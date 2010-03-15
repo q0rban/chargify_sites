@@ -103,14 +103,14 @@ function chargify_sites_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
       case 'load':
         return chargify_sites_node_load($node);
       case 'view':
-        if (isset($node->subscription) && $output = theme('chargify_subscription_state', $node->subscription->state)) {
-          $weight = content_extra_field_weight($node->type, 'chargify_sites');
+        $output = isset($node->subscription) ? theme('chargify_subscription_state', $node->subscription->state) : theme('chargify_sites_payment_link', $node);
+        $weight = content_extra_field_weight($node->type, 'chargify_sites');
 
-          $node->content['chargify_sites'] = array(
-            '#weight' => !empty($weight) ? $weight : -10,
-            '#value' => $output,
-          );
-        }
+        $node->content['chargify_sites'] = array(
+          '#weight' => !empty($weight) ? $weight : -10,
+          '#value' => $output,
+        );
+
         $teaser = $a3;
         $page = $a4;
         if (!$teaser && $page) {
@@ -136,6 +136,9 @@ function chargify_sites_theme() {
   );
   $items['chargify_sites_tos'] = array(
     'arguments' => array('url' => NULL),
+  );
+  $items['chargify_sites_payment_link'] = array(
+    'arguments' => array('nid' => NULL),
   );
 
   return $items;
@@ -216,6 +219,21 @@ function theme_chargify_sites_tos($url) {
   $output .= "</div>\n";
 
   return $output;
+}
+
+/**
+ * Theme function for displaying the link to pay for a node.
+ */
+function theme_chargify_sites_payment_link($node) {
+  if (chargify_sites_payment_page_access($node)) {
+    $options = array(
+      'attributes' => array(
+        'title' => chargify_sites_payment_page_title($node),
+        'class' => 'chargify-sites-payment-link',
+      ),
+    );
+    return l(t('Time to Pay!'), "new-site/{$node->nid}/time-to-pay", $options);
+  }
 }
 
 /**

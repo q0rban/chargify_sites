@@ -1,5 +1,4 @@
 core = "6.x"
-dependencies[] = "location"
 dependencies[] = "views"
 dependencies[] = "chargify"
 dependencies[] = "features"
