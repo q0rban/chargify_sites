@@ -17,19 +17,6 @@ function _chargify_sites_views_default_views() {
   $view->api_version = 2;
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   $handler = $view->new_display('default', 'Defaults', 'default');
-  $handler->override_option('relationships', array(
-    'subscription_id' => array(
-      'label' => 'Chargify Subscription',
-      'required' => 0,
-      'id' => 'subscription_id',
-      'table' => 'chargify_sites',
-      'field' => 'subscription_id',
-      'relationship' => 'none',
-      'override' => array(
-        'button' => 'Override',
-      ),
-    ),
-  ));
   $handler->override_option('fields', array(
     'title' => array(
       'label' => 'Domain name',
@@ -130,14 +117,11 @@ function _chargify_sites_views_default_views() {
   ));
   $handler->override_option('sorts', array(
     'created' => array(
-      'order' => 'ASC',
+      'order' => 'DESC',
       'granularity' => 'second',
       'id' => 'created',
       'table' => 'node',
       'field' => 'created',
-      'override' => array(
-        'button' => 'Override',
-      ),
       'relationship' => 'none',
     ),
   ));
@@ -204,6 +188,32 @@ function _chargify_sites_views_default_views() {
   $handler->override_option('use_ajax', TRUE);
   $handler->override_option('use_pager', '1');
   $handler->override_option('style_plugin', 'table');
+  $handler->override_option('style_options', array(
+    'grouping' => '',
+    'override' => 1,
+    'sticky' => 0,
+    'order' => 'desc',
+    'columns' => array(
+      'title' => 'title',
+      'created' => 'created',
+      'state_name' => 'state_name',
+    ),
+    'info' => array(
+      'title' => array(
+        'sortable' => 1,
+        'separator' => '',
+      ),
+      'created' => array(
+        'sortable' => 1,
+        'separator' => '',
+      ),
+      'state_name' => array(
+        'sortable' => 0,
+        'separator' => '',
+      ),
+    ),
+    'default' => 'created',
+  ));
   $handler = $view->new_display('page', 'My Sites Page', 'page_1');
   $handler->override_option('path', 'my-sites');
   $handler->override_option('menu', array(
