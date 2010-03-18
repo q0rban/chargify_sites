@@ -95,6 +95,9 @@ function chargify_sites_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
     switch ($op) {
       case 'insert':
         $_REQUEST['destination'] = 'new-site/'. $node->nid .'/time-to-pay';
+        if (isset($node->subscription['product_handle']) && $node->subscription['product_handle']) {
+          $_REQUEST['destination'] .= '?product_handle='. urlencode($node->subscription['product_handle']);
+        }
       case 'update':
         if (isset($node->subscription->subscription_id)) {
           chargify_sites_node_save($node);
@@ -173,6 +176,19 @@ function chargify_sites_content_extra_fields() {
  * Implementation of hook_form_alter().
  */
 function chargify_sites_form_site_node_form_alter(&$form, $form_state) {
+  if ($product = menu_get_object('chargify_sites_product')) {
+    $form['subscription'] = array('#tree' => TRUE);
+    $form['subscription']['product_handle'] = array(
+      '#type' => 'hidden',
+      '#value' => $product->getHandle(),
+    );
+    $form['#product'] = $product;
+  }
+  else {
+    drupal_set_message(t("Whoopsy, there was a problem accessing that product. Try contacting whoever sent you here. :("), 'error');
+    drupal_goto('<front>');
+  }
+
   $form['buttons']['preview']['#access'] = FALSE;
   $form['buttons']['submit']['#value'] = t('Continue');
   if ($tos_path = variable_get('chargify_sites_tos', '')) {

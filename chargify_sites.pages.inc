@@ -83,9 +83,15 @@ function chargify_sites_new_site_page($product) {
  */
 function chargify_sites_payment_page($node) {
   if ($node) {
-    if (!(isset($node->subscription) && $node->subscription->state)) {
+    $product_handle = isset($_GET['product_handle']) ? $_GET['product_handle'] : $node->subscription->product_handle;
+
+    if ($product_handle && !(isset($node->subscription) && $node->subscription->state)) {
       drupal_add_js(drupal_get_path('module', 'chargify_sites') .'/fancyForm.js');
-      return drupal_get_form('chargify_sites_payment_form', $node);
+      return drupal_get_form('chargify_sites_payment_form', $node, $product_handle);
+    }
+    else if (empty($product_handle)) {
+      drupal_set_title(t("Whoopsy"));
+      return t("Hmm, something happened there that shouldn't have. Please contact the someone that sent you here. :(");
     }
     else {
       drupal_set_title(t("You're paid up!"));
@@ -97,10 +103,15 @@ function chargify_sites_payment_page($node) {
 /**
  * Payment form.
  */
-function chargify_sites_payment_form(&$form_state, $node) {
+function chargify_sites_payment_form(&$form_state, $node, $product_handle) {
   $form = array();
 
   $form['#node'] = $node;
+
+  $form['product_handle'] = array(
+    '#type' => 'hidden',
+    '#value' => $product_handle,
+  );
 
   // @todo: check to make sure user registration is turned on.
   if (user_is_anonymous()) {
@@ -411,7 +422,7 @@ function chargify_sites_subscription_create($values, $account, $node) {
 }
 
 /**
- * Creates the subscription post data to send to chargify
+ * Creates the subscription post data to send to Chargify.
  *
  * @param $values
  *   The submitted data.
@@ -423,7 +434,7 @@ function chargify_sites_subscription_create($values, $account, $node) {
 function _chargify_sites_subscription_create($values, $account) {
   $object = new stdClass();
 
-  $object->subscription->product_handle = 'basic';
+  $object->subscription->product_handle = $values['product_handle'];
 
   if (isset($account->customer_id)) {
     $object->subscription->customer_id = $account->customer_id;
