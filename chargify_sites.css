@@ -206,7 +206,8 @@ div.chargify-state {
 	text-shadow: 1px 1px 2px #999;
 }
 
-div.chargify-state-active {
+div.chargify-state-active,
+div.chargify-state-trialing {
 	background-color: #aeffc0;
 	border-color: #90d39f;
 }
