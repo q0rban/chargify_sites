@@ -305,8 +305,6 @@ function chargify_sites_payment_form_submit($form, &$form_state) {
   }
 
   if ($account && $subscription = chargify_sites_subscription_create($values, $account, $node)) {
-    // Set the subscription id on the node.
-    $node->subscription->subscription_id = $subscription->getId();
     $form_state['redirect'] = "node/{$node->nid}";
   }
   else {
@@ -379,7 +377,7 @@ function _chargify_sites_user_update(&$account, $subscription) {
 /**
  * Creates a subscription for a node and user.
  */
-function chargify_sites_subscription_create($values, $account, $node) {
+function chargify_sites_subscription_create($values, $account, &$node) {
   $success = TRUE;
   $link = l($node->title, "node/{$node->nid}");
   $json = _chargify_sites_subscription_create($values, $account);
@@ -392,23 +390,29 @@ function chargify_sites_subscription_create($values, $account, $node) {
         drupal_set_message(t((string) $error), 'error');
       }
     }
-    // Make sure the subscription is Active.
-    else if ($subscription->getState() == CHARGIFY_ACTIVE || $subscription->getState() == CHARGIFY_TRIALING) {
-      $message = "Successful subscription for !node by <a href='!user_url'>%customer</a>.";
-      $vars = array(
-        '!node' => $link,
-        '!user_url' => url("user/{$account->uid}"),
-        '%customer' => $account->name,
-      );
-      watchdog('subscription', $message, $vars, WATCHDOG_INFO, $link);
-      drupal_set_message(t('Yay! You are now all paid up on !title.', array('!title' => $node->title)));
-  
-      _chargify_sites_user_update($account, $subscription);
-    }
-    // Otherwise we have a subscription in some other state. Notify the user.
     else {
-      $success = FALSE;
-      drupal_set_message(t('This subscription state is currently %state.', array('%state' => chargify_subscription_state($subscription->getState()))));
+      // Set the subscription id on the node.
+      if ($sub_id = $subscription->getId()) {
+        $node->subscription->subscription_id = $sub_id;
+      }
+      // Make sure the subscription is Active or Trialing.
+      if ($subscription->getState() == CHARGIFY_ACTIVE || $subscription->getState() == CHARGIFY_TRIALING) {
+        $message = "Successful subscription for !node by <a href='!user_url'>%customer</a>.";
+        $vars = array(
+          '!node' => $link,
+          '!user_url' => url("user/{$account->uid}"),
+          '%customer' => $account->name,
+        );
+        watchdog('subscription', $message, $vars, WATCHDOG_INFO, $link);
+        drupal_set_message(t('Yay! You are now all paid up on !title.', array('!title' => $node->title)));
+    
+        _chargify_sites_user_update($account, $subscription);
+      }
+      // Otherwise we have a subscription in some other state. Notify the user.
+      else {
+        $success = FALSE;
+        drupal_set_message(t('This subscription state is currently %state.', array('%state' => chargify_subscription_state($subscription->getState()))));
+      }
     }
   }
 
