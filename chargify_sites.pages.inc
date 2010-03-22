@@ -393,7 +393,7 @@ function chargify_sites_subscription_create($values, $account, $node) {
       }
     }
     // Make sure the subscription is Active.
-    else if ($subscription->getState() == CHARGIFY_ACTIVE) {
+    else if ($subscription->getState() == CHARGIFY_ACTIVE || $subscription->getState() == CHARGIFY_TRIALING) {
       $message = "Successful subscription for !node by <a href='!user_url'>%customer</a>.";
       $vars = array(
         '!node' => $link,
