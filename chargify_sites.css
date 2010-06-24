@@ -1,4 +1,7 @@
-/* @override http://chargify/sites/all/modules/webgear/features/chargify_sites/chargify_sites.css?K */
+/* @override 
+	http://readysitebuild.com/sites/all/modules/webgear/features/chargify_sites/chargify_sites.css?X
+	https://readysitebuild.com/sites/default/modules/chargify_sites/chargify_sites.css?X
+*/
 
 /* @group Product Page */
 
@@ -210,6 +213,32 @@ div.chargify-state-active,
 div.chargify-state-trialing {
 	background-color: #aeffc0;
 	border-color: #90d39f;
+}
+
+/* @end */
+
+/* @group Register/Login */
+
+#chargify-sites-payment-form div.login-register-wrapper h2.fieldset-title {
+  padding:3px 10px;
+  color:#fff;
+  font-weight:normal;
+  background:#39b;
+
+  -moz-border-radius:20px;
+  -webkit-border-radius:20px;
+  text-align: center;
+  margin: 0 auto;
+  width: 75%;
+  cursor: pointer;
+  margin-bottom: 5px;
+  }
+
+#chargify-sites-payment-form div.login-register-wrapper h2.active {
+	background: none;
+	color: #242424;
+	font-weight: bold;
+	cursor: inherit;
 }
 
 /* @end */

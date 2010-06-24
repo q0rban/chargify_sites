@@ -50,3 +50,28 @@ Drupal.behaviors.fancyFormLabels = function (context) {
     }
   }
 };
+
+Drupal.behaviors.registerLoginForm = function (context) {
+  // This is very hastily put together. Need to optimize.
+  $('#chargify-sites-payment-form div.login-register-wrapper div.fieldset-content, #chargify-sites-payment-form div.payment, #chargify-sites-payment-form input.form-submit').hide();
+  
+  $('#chargify-sites-payment-form div.register h2.fieldset-title').not('.active').click(
+    function () {
+      $('#chargify-sites-payment-form div.payment, #chargify-sites-payment-form input.form-submit').slideDown('fast');
+      $(this).addClass('active');
+      $('#chargify-sites-payment-form div.login h2.fieldset-title').removeClass('active');
+      $('#chargify-sites-payment-form div.register div.fieldset-content').slideDown('fast');
+      $('#chargify-sites-payment-form div.login div.fieldset-content').slideUp('fast');
+    }
+  );
+  
+  $('#chargify-sites-payment-form div.login h2.fieldset-title').not('.active').click(
+    function () {
+      $('#chargify-sites-payment-form div.payment, #chargify-sites-payment-form input.form-submit').slideDown('fast');
+      $(this).addClass('active');
+      $('#chargify-sites-payment-form div.register h2.fieldset-title').removeClass('active');
+      $('#chargify-sites-payment-form div.login div.fieldset-content').slideDown('fast');
+      $('#chargify-sites-payment-form div.register div.fieldset-content').slideUp('fast');
+    }
+  );
+}
