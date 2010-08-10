@@ -31,6 +31,8 @@ Drupal.behaviors.fancyFormLabels = function (context) {
     $(this).siblings().filter('div.fancy-label').children().addClass('active');
   }
 
+  // @todo, this needs more logic to handle the first keystroke. Currently 
+  // doesn't hide right away like it should.
   function showHideLabels() {
     var span = $(this).siblings().filter('div.fancy-label').children();
     span.hide();
