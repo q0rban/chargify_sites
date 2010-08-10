@@ -3,6 +3,10 @@
 	https://readysitebuild.com/sites/default/modules/chargify_sites/chargify_sites.css?X
 */
 
+div.fancy-label span.active {
+  color: #ddd;
+}
+
 /* @group Product Page */
 
 #chargify-sites-product-page div.chargify-sites-product-description {

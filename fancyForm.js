@@ -14,13 +14,30 @@ Drupal.behaviors.fancyFormLabels = function (context) {
   var fields = $('input.form-text', context).not('[type=password]');
   var forms = fields.parents('form:first');
 
-  fields.blur(putLabels).focus(clearLabels).blur();
+  // We need to bind to both keydown and keyup in case TAB is used.
+  fields.blur(fancyBlur).focus(fancyFocus).bind('keydown.autocomplete', showHideLabels).bind('keyup.autocomplete', showHideLabels).blur().each(putLabels).each(showHideLabels);
+
   forms.each(function() {
     $(this).submit(function() {
       $('input[type=submit]', this).attr('disabled', 'disabled').val("Please wait...");
-      fields.focus();
     });
   });
+
+  function fancyBlur() {
+    $(this).siblings().filter('div.fancy-label').children().removeClass('active');
+  }
+
+  function fancyFocus() {
+    $(this).siblings().filter('div.fancy-label').children().addClass('active');
+  }
+
+  function showHideLabels() {
+    var span = $(this).siblings().filter('div.fancy-label').children();
+    span.hide();
+    if ($(this).val().length < 1) {
+      span.show();
+    }
+  }
 
   function putLabels() {
     var element = $(this);
@@ -35,18 +52,28 @@ Drupal.behaviors.fancyFormLabels = function (context) {
       val = val[0];
     }
 
-    if ((element.val() === this.defaultValue) && (this.size > val.length)) {
-      if (label) {
-        label.hide();
-      }
-      element.val(val).attr('label', val);
-    }
-  }
-
-  function clearLabels() {
-    var element = $(this);
-    if (element.attr('label') == element.val()) {
-      element.val(this.defaultValue);
+    // Make sure the label actually fits in to the field.
+    if ((this.size > val.length) && label) {
+      label.hide();
+      var newLabel = '<div class="fancy-label"><span>' + val + '</span></div>';
+      var fieldStyle = {
+        "background": 'none',
+        "position": 'absolute',
+        "z-index": '1'
+      };
+      var divStyle = {
+        "background": 'none',
+        "width": element.css('width'),
+        "height": element.css('height'),
+        "background-color": element.css('background-color'),
+        "padding-top": element.css('padding-top'),
+        "padding-right": element.css('padding-right'),
+        "padding-bottom": element.css('padding-bottom'),
+        "padding-left": element.css('padding-left'),
+        "font-size": element.css('font-size'),
+        "line-height": element.css('line-height')
+      };
+      element.css(fieldStyle).parent().css('position', 'relative').append(newLabel).children().filter('div.fancy-label').css(divStyle).children().hide();
     }
   }
 };
