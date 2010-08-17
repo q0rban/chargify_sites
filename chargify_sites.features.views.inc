@@ -208,7 +208,7 @@ function _chargify_sites_views_default_views() {
         'separator' => '',
       ),
       'state_name' => array(
-        'sortable' => 0,
+        'sortable' => 1,
         'separator' => '',
       ),
     ),
@@ -269,8 +269,8 @@ function _chargify_sites_views_default_views() {
       'alter' => array(
         'alter_text' => 0,
         'text' => '',
-        'make_link' => 0,
-        'path' => '',
+        'make_link' => 1,
+        'path' => 'https://readysitebuild.chargify.com/subscriptions/[subscription_id]',
         'link_class' => '',
         'alt' => '',
         'prefix' => '',
@@ -297,7 +297,7 @@ function _chargify_sites_views_default_views() {
       'id' => 'subscription_id',
       'table' => 'chargify_subscriptions',
       'field' => 'subscription_id',
-      'relationship' => 'subscription_id',
+      'relationship' => 'none',
       'override' => array(
         'button' => 'Use default',
       ),
