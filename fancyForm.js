@@ -81,26 +81,30 @@ Drupal.behaviors.fancyFormLabels = function (context) {
 };
 
 Drupal.behaviors.registerLoginForm = function (context) {
-  // This is very hastily put together. Need to optimize.
-  $('#chargify-sites-payment-form div.login-register-wrapper div.fieldset-content, #chargify-sites-payment-form div.payment, #chargify-sites-payment-form input.form-submit').hide();
-  
-  $('#chargify-sites-payment-form div.register h2.fieldset-title').not('.active').click(
+  var form = $('#chargify-sites-login-form', context);
+  $('div.login-register-wrapper div.fieldset-content, input.form-submit', form).hide();
+
+  $('div.register h2.fieldset-title', form).not('.active').click(
     function () {
-      $('#chargify-sites-payment-form div.payment, #chargify-sites-payment-form input.form-submit').slideDown('fast');
+      $('input.form-submit', form).slideDown('fast');
       $(this).addClass('active');
-      $('#chargify-sites-payment-form div.login h2.fieldset-title').removeClass('active');
-      $('#chargify-sites-payment-form div.register div.fieldset-content').slideDown('fast');
-      $('#chargify-sites-payment-form div.login div.fieldset-content').slideUp('fast');
+      $('div.login h2.fieldset-title', form).removeClass('active');
+      $('div.register div.fieldset-content', form).slideDown('fast');
+      $('div.login div.fieldset-content', form).slideUp('fast').children().find('input').each(function() { 
+        $(this).val('').keyup();
+      });
     }
   );
   
-  $('#chargify-sites-payment-form div.login h2.fieldset-title').not('.active').click(
+  $('div.login h2.fieldset-title', form).not('.active').click(
     function () {
-      $('#chargify-sites-payment-form div.payment, #chargify-sites-payment-form input.form-submit').slideDown('fast');
+      $('input.form-submit', form).slideDown('fast');
       $(this).addClass('active');
-      $('#chargify-sites-payment-form div.register h2.fieldset-title').removeClass('active');
-      $('#chargify-sites-payment-form div.login div.fieldset-content').slideDown('fast');
-      $('#chargify-sites-payment-form div.register div.fieldset-content').slideUp('fast');
+      $('div.register h2.fieldset-title', form).removeClass('active');
+      $('div.login div.fieldset-content', form).slideDown('fast');
+      $('div.register div.fieldset-content', form).slideUp('fast').children().find('input').each(function() { 
+        $(this).val('').keyup();
+      });
     }
   );
 }

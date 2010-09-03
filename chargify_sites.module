@@ -34,11 +34,20 @@ function chargify_sites_menu() {
     'file' => 'chargify_sites.pages.inc',
   );
 
+  $items['new-site/%node/login'] = array(
+    'title' => 'Please Login or Register',
+    'description' => 'Please Login or Register in order to complete your purchase.',
+    'page callback' => 'chargify_sites_login_page',
+    'page arguments' => array(1),
+    'access callback' => 'chargify_sites_payment_page_access',
+    'access arguments' => array(1),
+    'file' => 'chargify_sites.pages.inc',
+  );
+
   $items['new-site/%node/time-to-pay'] = array(
     'title' => 'Payment',
     'title callback' => 'chargify_sites_payment_page_title',
     'title arguments' => array(1),
-    'description' => 'Configure settings',
     'page callback' => 'chargify_sites_payment_page',
     'page arguments' => array(1),
     'access callback' => 'chargify_sites_payment_page_access',
@@ -94,7 +103,7 @@ function chargify_sites_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   if ($node->type == 'site') {
     switch ($op) {
       case 'insert':
-        $_REQUEST['destination'] = 'new-site/'. $node->nid .'/time-to-pay';
+        $_REQUEST['destination'] = 'new-site/'. $node->nid .'/login';
         if (isset($node->subscription['product_handle']) && $node->subscription['product_handle']) {
           $_REQUEST['destination'] .= '?product_handle='. urlencode($node->subscription['product_handle']);
         }

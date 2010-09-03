@@ -78,6 +78,125 @@ function chargify_sites_new_site_page($product) {
   return theme('chargify_sites_product_page', $product);
 }
 
+function chargify_sites_login_page($node) {
+  if ($node) {
+    $product_handle = isset($_GET['product_handle']) ? $_GET['product_handle'] : $node->subscription->product_handle;
+    if (user_is_anonymous()) {
+      drupal_add_js(drupal_get_path('module', 'chargify_sites') .'/fancyForm.js');
+      return drupal_get_form('chargify_sites_login_form', $node, $product_handle);
+    }
+    else {
+      $path = "new-site/{$node->nid}/time-to-pay";
+      drupal_goto($path, 'product_handle='. urlencode($product_handle));
+    }
+  }
+  else {
+    drupal_access_denied();
+  }
+}
+
+function chargify_sites_login_form(&$form_state, $node, $product_handle) {
+  if (!user_is_anonymous()) {
+    drupal_access_denied();
+  }
+  $form['#node'] = $node;
+
+  $form['product_handle'] = array(
+    '#type' => 'hidden',
+    '#value' => $product_handle,
+  );
+
+  // @todo: check to make sure user registration is turned on.
+  $form['register'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Create an account'),
+    '#attributes' => array('class' => 'register'),
+    '#tree' => TRUE,
+    '#prefix' => "<div class='login-register-wrapper'>",
+  );
+  $form['register']['mail'] = array(
+    '#type' => 'textfield',
+    '#title' => t('E-mail address'),
+    '#default_value' => '',
+    '#maxlength' => EMAIL_MAX_LENGTH,
+  );
+  $form['register']['pass'] = array(
+    '#type' => 'password_confirm',
+  );
+
+  $form['login'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Login to an existing account'),
+    '#attributes' => array('class' => 'login'),
+    '#tree' => TRUE,
+    '#suffix' => "</div>",
+  );
+  $form['login']['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('E-mail address'),
+    '#default_value' => '',
+    '#maxlength' => EMAIL_MAX_LENGTH,
+  );
+  $form['login']['pass'] = array(
+    '#type' => 'password',
+    '#title' => t('Password'),
+  );
+
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Submit'));
+
+  return $form;
+}
+
+/**
+ * Implementation of hook_form_validate().
+ *
+ * Errors should be signaled with form_set_error().
+ */
+function chargify_sites_login_form_validate($form, &$form_state) {
+  $values = &$form_state['values'];
+  $user_form_state = array();
+
+  if ($values['login']['name']) {
+    if ($name = db_result(db_query("SELECT name FROM {users} WHERE LOWER(mail) = LOWER('%s')", $values['login']['name']))) {
+      form_set_value($form['login']['name'], $name, $form_state);
+    }
+    $user_form_state['values'] = &$values['login'];
+    foreach (user_login_default_validators() as $fnc) {
+      $fnc($form['login'], $user_form_state);
+    }
+  }
+  else if ($values['register']['mail']) {
+    $values['register']['name'] = $values['register']['mail'];
+    $user_form_state['values'] = &$values['register'];
+    user_register_validate($form['register'], $user_form_state);
+  }
+  else {
+    form_set_error('register', t('Whoops, you need to log in or register.'));
+  }
+}
+
+/**
+ * Submit handler for chargify_sites_login_form.
+ */
+function chargify_sites_login_form_submit($form, &$form_state) {
+  $values = $form_state['values'];
+  $node = $form['#node'];
+  global $user;
+
+  if (isset($values['register']) && $values['register']['mail']) {
+    $values['register']['name'] = $values['register']['mail'];
+    $dummy_form_state = array('values' => &$values['register']);
+    user_register_submit($form, $dummy_form_state);
+  }
+
+  // Update the node creator
+  $node->uid = $user->uid;
+  // Re-save the node.
+  node_save($node);
+
+  $form_state['redirect'] = array("new-site/{$node->nid}/time-to-pay", 'product_handle='. urlencode($values['product_handle']));
+}
+
 /**
  * Page callback for the Payment page.
  */
@@ -104,7 +223,25 @@ function chargify_sites_payment_page($node) {
  * Payment form.
  */
 function chargify_sites_payment_form(&$form_state, $node, $product_handle) {
+  if (user_is_anonymous()) {
+    drupal_access_denied();
+  }
+
   $form = array();
+  global $user;
+
+  $form['mail'] = array(
+    '#type' => 'hidden',
+    '#value' => $user->mail,
+  );
+
+  // The user object doesn't have the customer ID yet, so we need to load it.
+  if ($customer_id = chargify_uid_to_customer_id($user->uid)) {
+    $form['customer_id'] = array(
+      '#type' => 'hidden',
+      '#value' => $customer_id,
+    );
+  }
 
   $form['#node'] = $node;
 
@@ -112,60 +249,6 @@ function chargify_sites_payment_form(&$form_state, $node, $product_handle) {
     '#type' => 'hidden',
     '#value' => $product_handle,
   );
-
-  // @todo: check to make sure user registration is turned on.
-  if (user_is_anonymous()) {
-    $form['register'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Create an account'),
-      '#attributes' => array('class' => 'register'),
-      '#tree' => TRUE,
-      '#prefix' => "<div class='login-register-wrapper'>",
-    );
-    $form['register']['mail'] = array(
-      '#type' => 'textfield',
-      '#title' => t('E-mail address'),
-      '#default_value' => '',
-      '#maxlength' => EMAIL_MAX_LENGTH,
-    );
-    $form['register']['pass'] = array(
-      '#type' => 'password_confirm',
-    );
-
-    $form['login'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Login to an existing account'),
-      '#attributes' => array('class' => 'login'),
-      '#tree' => TRUE,
-      '#suffix' => "</div>",
-    );
-    $form['login']['mail'] = array(
-      '#type' => 'textfield',
-      '#title' => t('E-mail address'),
-      '#default_value' => '',
-      '#maxlength' => EMAIL_MAX_LENGTH,
-    );
-    $form['login']['pass'] = array(
-      '#type' => 'password',
-      '#title' => t('Password'),
-    );
-  }
-  else {
-    global $user;
-
-    $form['mail'] = array(
-      '#type' => 'hidden',
-      '#value' => $user->mail,
-    );
-
-    // The user object doesn't have the customer ID yet, so we need to load it.
-    if ($customer_id = chargify_uid_to_customer_id($user->uid)) {
-      $form['customer_id'] = array(
-        '#type' => 'hidden',
-        '#value' => $customer_id,
-      );
-    }
-  }
 
   $form['payment'] = array(
     '#type' => 'fieldset',
@@ -230,25 +313,7 @@ function chargify_sites_payment_form(&$form_state, $node, $product_handle) {
  * Errors should be signaled with form_set_error().
  */
 function chargify_sites_payment_form_validate($form, &$form_state) {
-  $values = $form_state['values'];
-
-  if (isset($values['login']) || isset($values['register'])) {
-    if ($values['login']['mail']) {
-      $values['login']['name'] = $values['login']['mail'];
-      $dummy_form_state = array('values' => &$values['login']);
-      foreach (user_login_default_validators() as $fnc) {
-        $fnc($form, $dummy_form_state);
-      }
-    }
-    else if ($values['register']['mail']) {
-      $values['register']['name'] = $values['register']['mail'];
-      $dummy_form_state = array('values' => &$values['register']);
-      user_register_validate($form, $dummy_form_state);
-    }
-    else {
-      form_set_error('register', t('Whoops, you need to log in or register in order to pay!'));
-    }
-  }
+  $values = &$form_state['values'];
 
   // Verify numeric on certain fields.
   $fields = array('card_number' => t('credit card number')); //, 'cvv' => t('CVV'), 'billing_zip' => t('billing zip code'));
@@ -290,29 +355,19 @@ function chargify_sites_payment_form_submit($form, &$form_state) {
   $node = $form['#node'];
   global $user;
 
-  if (isset($values['register']) && $values['register']['mail']) {
-    $values['register']['name'] = $values['register']['mail'];
-    $dummy_form_state = array('values' => &$values['register']);
-    user_register_submit($form, $dummy_form_state);
-  }
-
-  $account = $user;
-
   if (isset($values['customer_id'])) {
-    $account->customer_id = $values['customer_id'];
+    $user->customer_id = $values['customer_id'];
     // Unset the customer ID so chargify.module doesn't try to add it again.
     unset($values['customer_id']);
   }
 
-  if ($account && $subscription = chargify_sites_subscription_create($values, $account, $node)) {
+  if ($user && $subscription = chargify_sites_subscription_create($values, $user, $node)) {
     $form_state['redirect'] = "node/{$node->nid}";
   }
   else {
     drupal_set_message(t("Hmm. Something didn't work right. Can you please verify everything and try again?"), 'error');
   }
 
-  // Update the node creator
-  $node->uid = $account->uid;
   // Re-save the node.
   node_save($node);
 }

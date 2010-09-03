@@ -30,7 +30,7 @@ div.fancy-label span.active {
 }
 
 #chargify-sites-product-page form#node-form,
-#chargify-sites-payment-form div.login-register-wrapper,
+#chargify-sites-login-form div.login-register-wrapper,
 #chargify-sites-payment-form div.payment {
 	clear: right;
 	padding: 18px 24px 24px;
@@ -85,38 +85,42 @@ div.fancy-label span.active {
 
 /* @group Payment form */
 
+#chargify-sites-login-form h2.fieldset-title,
 #chargify-sites-payment-form h2.fieldset-title {
 	font-size: 1.2em;
 }
 
-#chargify-sites-payment-form div.login-register-wrapper {
+#chargify-sites-login-form div.login-register-wrapper {
 	float: left;
 	margin-bottom: 10px;
 	width: 630px;
 }
 
-#chargify-sites-payment-form div.login-register-wrapper div.form-item {
+#chargify-sites-login-form div.login-register-wrapper div.form-item {
 	background: none;
 }
 
+#chargify-sites-login-form div.fieldset,
 #chargify-sites-payment-form div.fieldset {
 	padding-top: 40px;
 }
 
+#chargify-sites-login-form legend,
 #chargify-sites-payment-form legend {
 	text-transform: none !important;
 	letter-spacing: 0;
 	font-size: 1.6em;
 }
 
+#chargify-sites-login-form label,
 #chargify-sites-payment-form label {
 	text-transform: none;
 	font-weight: normal;
 	font-size: 1.1em;
 }
 
-#chargify-sites-payment-form div.register,
-#chargify-sites-payment-form div.login {
+#chargify-sites-login-form div.register,
+#chargify-sites-login-form div.login {
 	margin: 0;
 	width: 315px;
 	background: none;
@@ -124,8 +128,8 @@ div.fancy-label span.active {
 	padding: 0;
 }
 
-#chargify-sites-payment-form div.register legend,
-#chargify-sites-payment-form div.login legend {
+#chargify-sites-login-form div.register legend,
+#chargify-sites-login-form div.login legend {
 	position: relative;
 	text-indent: -24px; /* TODO: figure out why this is happening */
 	top: 0;
@@ -134,20 +138,17 @@ div.fancy-label span.active {
 	font-size: 1.6em;
 }
 
+#chargify-sites-login-form input.form-text,
 #chargify-sites-payment-form input.form-text {
 	max-width: 340px;
 }
 
-#chargify-sites-payment-form div.register {
+#chargify-sites-login-form div.register {
 	float: left;
 }
 
-#chargify-sites-payment-form div.login {
+#chargify-sites-login-form div.login {
 	float: right;
-}
-
-#chargify-sites-payment-form div.payment {
-	clear: left;
 }
 
 #chargify-sites-payment-form div.payment #edit-first-name-wrapper,
@@ -185,6 +186,7 @@ div.fancy-label span.active {
 	float: left;
 }
 
+#chargify-sites-login-form input.form-submit,
 #chargify-sites-payment-form input.form-submit {
 	clear: both;
 }
@@ -223,7 +225,7 @@ div.chargify-state-trialing {
 
 /* @group Register/Login */
 
-#chargify-sites-payment-form div.login-register-wrapper h2.fieldset-title {
+#chargify-sites-login-form div.login-register-wrapper h2.fieldset-title {
   padding:3px 10px;
   color:#fff;
   font-weight:normal;
@@ -238,7 +240,7 @@ div.chargify-state-trialing {
   margin-bottom: 5px;
   }
 
-#chargify-sites-payment-form div.login-register-wrapper h2.active {
+#chargify-sites-login-form div.login-register-wrapper h2.active {
 	background: none;
 	color: #242424;
 	font-weight: bold;
